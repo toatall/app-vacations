@@ -1,6 +1,5 @@
 // webpack.config.js
 const path = require('path');
-const webpack = require('webpack');
 
 const PATHS = {
     source: path.join(__dirname, 'resources/js'),
@@ -15,6 +14,7 @@ module.exports = (env, argv) => {
     };
 
     return {
+        watch: true,
         mode: 'development',
         entry: [
             './resources/js/app.js'
@@ -36,8 +36,8 @@ module.exports = (env, argv) => {
                     use: 'vue-loader'
                 },
                 {
-                    test: /\.css$/,
-                    loader: ['style-loader', 'css-loader']
+                    test: /\.css$/i,
+                    use: ['style-loader', 'css-loader']
                 }
             ]
         },
