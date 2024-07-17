@@ -1,42 +1,47 @@
+<script setup>
+import { v4 as uuid } from 'uuid'
+
+defineOptions({
+  inheritAttrs: false,
+})
+
+const props = defineProps({
+  id: {
+    type: String,
+    default() {
+      return `text-input-${uuid()}`
+    },
+  },
+  type: {
+    type: String,
+    default: 'text',
+  },
+  error: String,
+  label: String,
+  modelValue: String,
+})
+
+const emits = defineEmits(['update:modelValue'])
+
+const focus = () => {
+  input.value.focus()
+}
+
+const select = () => {
+  input.value.select()
+}
+
+const updateModelValue = (e) => {
+  emits('update:modelValue', e.target.value)
+}
+</script>
+
 <template>
-  <div>
+  <div :class="$attrs.class">
     <label v-if="label" class="form-label" :for="id">{{ label }}:</label>
-    <input :id="id" ref="input" v-bind="$attrs" class="form-input" :class="{ error: errors.length }" :type="type" :value="value" @input="$emit('input', $event.target.value)">
-    <div v-if="errors.length" class="form-error">{{ errors[0] }}</div>
+    <input :id="id" ref="input" v-bind="{ ...$attrs, class: null }" class="form-input" :class="{ error: error }" :type="type" :value="modelValue" @input="updateModelValue" />
+    <div v-if="error" class="form-error">{{ error }}</div>
   </div>
 </template>
 
-<script>
-export default {
-  inheritAttrs: false,
-  props: {
-    id: {
-      type: String,
-      default() {
-        return `text-input-${this._uid}`
-      },
-    },
-    type: {
-      type: String,
-      default: 'text',
-    },
-    value: String,
-    label: String,
-    errors: {
-      type: Array,
-      default: () => [],
-    },
-  },
-  methods: {
-    focus() {
-      this.$refs.input.focus()
-    },
-    select() {
-      this.$refs.input.select()
-    },
-    setSelectionRange(start, end) {
-      this.$refs.input.setSelectionRange(start, end)
-    },
-  },
-}
-</script>
+
