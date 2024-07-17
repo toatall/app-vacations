@@ -1,14 +1,16 @@
-![Build & Deploy](https://github.com/tbreuss/pingcrm-yii2/workflows/Build%20&%20Deploy/badge.svg)
-
 # Ping CRM on Yii 2
 
 A Yii 2 demo application to illustrate how [Inertia.js](https://inertiajs.com) works.
 
-With Inertia you are able to build single-page apps using classic server-side routing and controllers, without building an API. 
+With Inertia you are able to build single-page apps using classic server-side routing and controllers, without building an API.
 
 This application is a port of the original [Ping CRM written in Laravel](https://github.com/inertiajs/pingcrm) and based on the [Yii 2 Basic Project Template](https://github.com/yiisoft/yii2-app-basic). 
 
 ![](screenshot.png)
+
+**Based on the application https://github.com/tbreuss/pingcrm-yii2**
+
+Changes: Updated Vue to version 3, updated npm packages and composer. Converted Vue files to Composition API (script setup).
 
 ## Demo
 
@@ -19,8 +21,8 @@ This application is a port of the original [Ping CRM written in Laravel](https:/
 Clone the repo locally:
 
 ```sh
-git clone https://github.com/tbreuss/pingcrm-yii2 pingcrm-yii2
-cd pingcrm-yii2
+git clone https://github.com/toatall/pingcrm-yii2-vue3 pingcrm-yii2-vue3
+cd pingcrm-yii2-vue3
 ```
 
 Install PHP dependencies:
@@ -38,8 +40,8 @@ npm ci
 Build assets:
 
 ```sh
-npm run dev
 npm run css-dev
+npm run dev
 ```
 
 Create an SQLite database. You can also use another database (MySQL, Postgres), simply update your configuration accordingly.
@@ -81,7 +83,7 @@ To run the Ping CRM tests, run:
 
 ## Requirements
 
-- PHP >= 5.6.0
+- PHP >=7.4.0
 - Node.js & NPM
 - SQLite
 
@@ -126,6 +128,6 @@ You can find more information at <https://github.com/tbreuss/yii2-inertia>.
 You can find more information at <https://inertiajs.com>.
 
 ## Credits
-
 - Original work by Jonathan Reinink (@reinink) and contributors
 - Port to Yii 2 by Thomas Breuss (@tbreuss)
+- Modified by @toatall (https://github.com/toatall)
