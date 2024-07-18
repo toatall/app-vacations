@@ -14,8 +14,6 @@ module.exports = (env, argv) => {
     };
 
     return {
-        watch: true,
-        mode: 'development',
         entry: [
             './resources/js/app.js'
         ],

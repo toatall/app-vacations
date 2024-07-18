@@ -8,8 +8,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack --config webpack.config.js",
-    "prod": "webpack --config webpack.config.js --optimize-minimize --mode production",
+    "dev": "webpack --config webpack.config.js --watch --mode development",
+    "prod": "webpack --config webpack.config.js --optimization-minimize --mode production",
     "css-dev": "cross-env NODE_ENV=development postcss resources/css/app.css -o web/assets/inertia/css/app.css",
     "css-prod": "cross-env NODE_ENV=development postcss resources/css/app.css -o web/assets/inertia/css/app.min.css"
   },
