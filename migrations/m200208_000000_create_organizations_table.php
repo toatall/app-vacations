@@ -13,21 +13,12 @@ class m200208_000000_create_organizations_table extends Migration
     public function safeUp()
     {
         $this->createTable('organizations', [
-            'id' => $this->primaryKey(),
-            'account_id' => $this->integer()->null(),
-            'name' => $this->string(100)->notNull(),
-            'email' => $this->string(50)->null(),
-            'phone' => $this->string(50)->null(),
-            'address' => $this->string(150)->null(),
-            'city' => $this->string(50)->null(),
-            'region' => $this->string(50)->null(),
-            'country' => $this->string(2)->null(),
-            'postal_code' => $this->string(25)->null(),
+            'code' => 'VARCHAR(5) PRIMARY KEY',           
+            'name' => $this->string(250)->notNull(),
             'created_at' => $this->dateTime()->null(),
             'updated_at' => $this->dateTime()->null(),
             'deleted_at' => $this->dateTime()->null()
         ]);
-        $this->createIndex('organizations_account_id_index', 'organizations', 'account_id');
     }
 
     /**
@@ -35,6 +26,6 @@ class m200208_000000_create_organizations_table extends Migration
      */
     public function safeDown()
     {
-        return false;
+        $this->dropTable('organizations');
     }
 }

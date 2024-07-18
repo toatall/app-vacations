@@ -14,19 +14,17 @@ class m200208_000000_create_users_table extends Migration
     {
         $this->createTable('users', [
             'id' => $this->primaryKey(),
-            'account_id' => $this->integer()->null(),
-            'first_name' => $this->string(25)->notNull(),
-            'last_name' => $this->string(25)->notNull(),
+            'username' => $this->string(50)->notNull()->unique(),
+            'password' => $this->string()->null(),            
+            'full_name' => $this->string(250),
+            'post' => $this->string(250),
             'email' => $this->string(50)->unique(),
-            'password' => $this->string()->null(),
-            'owner' => $this->integer(1)->defaultValue(0),
-            'photo_path' => $this->string(100)->null(),
-            'remember_token' => $this->string()->null(),
+            'org_code' => $this->string(5),
+            'org_code_select' => $this->string(5),
             'created_at' => $this->dateTime()->null(),
             'updated_at' => $this->dateTime()->null(),
-            'deleted_at' => $this->dateTime()->null()
+            'deleted_at' => $this->dateTime()->null(),
         ]);
-        $this->createIndex('users_account_id_index', 'users', 'account_id');
     }
 
     /**
@@ -34,7 +32,7 @@ class m200208_000000_create_users_table extends Migration
      */
     public function safeDown()
     {
-        return false;
+        $this->dropTable('users');
     }
 
 }
