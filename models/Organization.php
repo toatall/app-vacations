@@ -14,15 +14,8 @@ use yii\db\Query;
  * This is the model class for table "organizations".
  *
  * @property int $id
- * @property int|null $account_id
+ * @property string $code
  * @property string $name
- * @property string|null $email
- * @property string|null $phone
- * @property string|null $address
- * @property string|null $city
- * @property string|null $region
- * @property string|null $country
- * @property string|null $postal_code
  * @property string|null $created_at
  * @property string|null $updated_at
  * @property string|null $deleted_at
@@ -44,16 +37,11 @@ class Organization extends ActiveRecord
      */
     public function rules()
     {
-        return [
-            [['account_id'], 'integer'],
-            [['name'], 'required'],
+        return [          
+            [['code', 'name'], 'required'],
             [['created_at', 'updated_at', 'deleted_at'], 'safe'],
-            [['name'], 'string', 'max' => 100],
-            [['email', 'phone', 'city', 'region'], 'string', 'max' => 50],
-            [['email'], 'email'],
-            [['address'], 'string', 'max' => 150],
-            [['country'], 'string', 'max' => 2],
-            [['postal_code'], 'string', 'max' => 25],
+            [['code'], 'string', 'max' => 5],
+            [['name'], 'string', 'max' => 250],                        
         ];
     }
 
@@ -63,29 +51,14 @@ class Organization extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'account_id' => 'Account ID',
-            'name' => 'Name',
-            'email' => 'Email',
-            'phone' => 'Phone',
-            'address' => 'Address',
-            'city' => 'City',
-            'region' => 'Region',
-            'country' => 'Country',
-            'postal_code' => 'Postal Code',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
-            'deleted_at' => 'Deleted At',
+            'id' => 'ИД',            
+            'code' => 'Код',
+            'name' => 'Наименование',            
+            'created_at' => 'Дата создания',
+            'updated_at' => 'Дата изменения',
+            'deleted_at' => 'Дата удаления',
         ];
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getContacts()
-    {
-        return $this->hasMany(Contact::class, ['organization_id' => 'id']);
-    }
+    }    
 
     /**
      * @return array
@@ -96,17 +69,7 @@ class Organization extends ActiveRecord
             [
                 'class' => TimestampBehavior::class,
                 'value' => date('Y-m-d H:i:s')
-            ],
-            [
-                'class' => AttributeBehavior::class,
-                'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => 'account_id',
-                    ActiveRecord::EVENT_BEFORE_UPDATE => 'account_id'
-                ],
-                'value' => function () {
-                    return Yii::$app->user->getIdentity()->account_id;
-                }
-            ]
+            ],            
         ];
     }
 
@@ -116,25 +79,14 @@ class Organization extends ActiveRecord
      */
     public static function findById($id)
     {
-        $organization = static::find()
-            ->select('id, name, email, phone, address, city, region, country, postal_code, deleted_at')
-            ->with('contacts')
+        $organization = static::find()                       
             ->where('id=:id', ['id' => $id])
             ->asArray()
             ->one();
 
         if (is_null($organization)) {
             return $organization;
-        }
-
-        $organization['contacts'] = array_map(function ($row) {
-            return [
-                'id' => $row['id'],
-                'name' => $row['first_name'] . ' ' . $row['last_name'],
-                'city' => $row['city'],
-                'phone' => $row['phone']
-            ];
-        }, $organization['contacts']);
+        }        
 
         return $organization;
     }
@@ -157,12 +109,12 @@ class Organization extends ActiveRecord
      */
     public static function findByParams($search = null, $trashed = null)
     {
-        $query = (new Query())
-            ->select('id, name, phone, city, deleted_at')
+        $query = (new Query())            
             ->from('organizations');
 
         if (!empty($search)) {
-            $query->andWhere(['like', 'name', $search]);
+            $query->andWhere(['like', 'code', $search]);
+            $query->orWhere(['like', 'name', $search]);
         }
 
         if ($trashed === 'with') {
@@ -188,9 +140,9 @@ class Organization extends ActiveRecord
     public static function getPairs()
     {
         $pairs = (new Query())
-            ->select('id, name')
+            ->select('code, name')
             ->from('organizations')
-            ->orderBy('name')
+            ->orderBy('code')
             ->where(['deleted_at' => null])
             ->all();
         return $pairs;

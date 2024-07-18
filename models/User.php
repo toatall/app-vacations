@@ -4,7 +4,6 @@ namespace app\models;
 
 use app\components\SoftDeleteTrait;
 use Yii;
-use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveRecord;
@@ -15,14 +14,13 @@ use yii\web\IdentityInterface;
  * This is the model class for table "users".
  *
  * @property int $id
- * @property int|null $account_id
- * @property string $first_name
- * @property string $last_name
+ * @property string $username
+ * @property string|null $org_code
+ * @property string|null $org_code_select
+ * @property string|null $full_name
  * @property string|null $email
  * @property string|null $password
- * @property bool|null $owner
- * @property string|null $photo_path
- * @property string|null $remember_token
+ * @property string|null $post
  * @property string|null $created_at
  * @property string|null $updated_at
  * @property string|null $deleted_at
@@ -44,16 +42,14 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function rules()
     {
-        return [
-            [['account_id'], 'integer'],
-            [['first_name', 'last_name'], 'required'],
-            [['owner'], 'boolean'],
+        return [            
+            [['username', 'email'], 'required'],          
             [['created_at', 'updated_at', 'deleted_at'], 'safe'],
-            [['first_name', 'last_name'], 'string', 'max' => 25],
+            [['full_name'], 'string', 'max' => 250],
             [['email'], 'string', 'max' => 50],
-            [['password', 'remember_token'], 'string', 'max' => 255],
-            [['photo_path'], 'string', 'max' => 100],
-            [['email'], 'unique'],
+            [['org_code', 'org_code_select'], 'string', 'max' => 5],
+            [['password'], 'string', 'max' => 255],            
+            [['username', 'email'], 'unique'],
         ];
     }
 
@@ -63,18 +59,17 @@ class User extends ActiveRecord implements IdentityInterface
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'account_id' => 'Account ID',
-            'first_name' => 'First Name',
-            'last_name' => 'Last Name',
+            'id' => 'ИД',            
+            'username' => 'Учетная запись',
+            'org_code' => 'Код организации',
+            'org_code_select' => 'Код организации выбран',
+            'full_name' => 'ФИО',
             'email' => 'Email',
-            'password' => 'Password',
-            'owner' => 'Owner',
-            'photo_path' => 'Photo Path',
-            'remember_token' => 'Remember Token',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
-            'deleted_at' => 'Deleted At',
+            'password' => 'Пароль',
+            'post' => 'Должность',
+            'created_at' => 'Дата создания',
+            'updated_at' => 'Дата изменения',
+            'deleted_at' => 'Дата удаления',
         ];
     }
 
@@ -87,24 +82,9 @@ class User extends ActiveRecord implements IdentityInterface
             [
                 'class' => TimestampBehavior::class,
                 'value' => date('Y-m-d H:i:s')
-            ],
-            [
-                'class' => AttributeBehavior::class,
-                'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => 'account_id',
-                    ActiveRecord::EVENT_BEFORE_UPDATE => 'account_id'
-                ],
-                'value' => function () {
-                    return Yii::$app->user->getIdentity()->account_id;
-                }
-            ]
+            ],            
         ];
-    }
-
-    public function getAccount()
-    {
-        return $this->hasOne(Account::class, ['id' => 'account_id']);
-    }
+    }    
 
     /**
      * Validates password
@@ -198,8 +178,7 @@ class User extends ActiveRecord implements IdentityInterface
 
     public static function findById($id)
     {
-        return static::find()
-            ->select('id, first_name, last_name, email, owner, photo_path, deleted_at')
+        return static::find()            
             ->where('id=:id', ['id' => $id])
             ->asArray()
             ->one();
@@ -207,20 +186,13 @@ class User extends ActiveRecord implements IdentityInterface
 
     public static function findByParams($search = null, $role = null, $trashed = null)
     {
-        $query = (new Query())
-            ->select('id, first_name, last_name, email, owner, photo_path, deleted_at')
+        $query = (new Query())            
             ->from('users');
 
         if (!empty($search)) {
-            $query->andWhere(['like', 'first_name', $search]);
-            $query->orWhere(['like', 'last_name', $search]);
-        }
-
-        if ($role === 'user') {
-            $query->andWhere(['owner' => '0']);
-        } elseif ($role === 'owner') {
-            $query->andWhere(['owner' => '1']);
-        }
+            $query->andWhere(['like', 'username', $search]);
+            $query->orWhere(['like', 'full_name', $search]);
+        }        
 
         if ($trashed === 'with') {
         } elseif ($trashed === 'only') {
@@ -229,7 +201,7 @@ class User extends ActiveRecord implements IdentityInterface
             $query->andWhere(['deleted_at' => null]);
         }
 
-        $query->orderBy('last_name ASC, first_name ASC');
+        $query->orderBy('full_name ASC');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
