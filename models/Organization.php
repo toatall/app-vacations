@@ -3,8 +3,6 @@
 namespace app\models;
 
 use app\components\SoftDeleteTrait;
-use Yii;
-use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveRecord;
@@ -13,7 +11,6 @@ use yii\db\Query;
 /**
  * This is the model class for table "organizations".
  *
- * @property int $id
  * @property string $code
  * @property string $name
  * @property string|null $created_at
@@ -50,6 +47,11 @@ class Organization extends ActiveRecord
      */
     public function attributeLabels()
     {
+        return static::attributeLabelsStatic();
+    }    
+
+    public static function attributeLabelsStatic()
+    {
         return [
             'id' => 'ИД',            
             'code' => 'Код',
@@ -58,7 +60,7 @@ class Organization extends ActiveRecord
             'updated_at' => 'Дата изменения',
             'deleted_at' => 'Дата удаления',
         ];
-    }    
+    }
 
     /**
      * @return array
@@ -71,24 +73,18 @@ class Organization extends ActiveRecord
                 'value' => date('Y-m-d H:i:s')
             ],            
         ];
-    }
+    }   
 
     /**
-     * @param int $id
+     * @param string $code
      * @return array|null
      */
-    public static function findById($id)
+    public static function findByCode($code)
     {
-        $organization = static::find()                       
-            ->where('id=:id', ['id' => $id])
+        return static::find()                       
+            ->where(['code' => $code])
             ->asArray()
             ->one();
-
-        if (is_null($organization)) {
-            return $organization;
-        }        
-
-        return $organization;
     }
 
     /**
@@ -110,7 +106,8 @@ class Organization extends ActiveRecord
     public static function findByParams($search = null, $trashed = null)
     {
         $query = (new Query())            
-            ->from('organizations');
+            ->from('organizations')
+            ->orderBy(['code' => SORT_ASC]);
 
         if (!empty($search)) {
             $query->andWhere(['like', 'code', $search]);
@@ -127,11 +124,16 @@ class Organization extends ActiveRecord
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
-                'pageSize' => 10,
-            ],
+                'pageSize' => 100000,
+            ],            
         ]);
 
         return $dataProvider;
+    }
+
+    public static function findActual()
+    {
+        return static::find()->andWhere(['deleted_at' => null]);
     }
 
     /**
