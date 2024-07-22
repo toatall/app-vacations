@@ -2,7 +2,9 @@
 
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'sqlite:@app/database/database.sqlite',
+    'dsn' => 'pgsql:host=localhost;port=5432;dbname=app-vacations',
+    'username'=>'postgres',
+	'password'=>'P@ssw0rd',
 
     // Schema cache options (for production environment)
     //'enableSchemaCache' => true,
