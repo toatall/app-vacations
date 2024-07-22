@@ -1,12 +1,13 @@
 <script setup>
-import { Head, Link, router, useForm } from '@inertiajs/vue3'
-import Icon from '@/Shared/Icon.vue'
-import pickBy from 'lodash/pickBy'
+import { Head, router } from '@inertiajs/vue3'
 import Layout from '@/Shared/Layout.vue'
-import throttle from 'lodash/throttle'
-import Pagination from '@/Shared/Pagination.vue'
-import SearchFilter from '@/Shared/SearchFilter.vue'
-import { watch } from 'vue'
+import { ref } from 'vue'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import { FilterMatchMode } from 'primevue/api'
+import Breadcrumbs from '@/Shared/Breadcrumbs.vue'
 
 defineOptions({
   layout: Layout,
@@ -16,82 +17,60 @@ const props = defineProps({
   filters: Object,
   organizations: Object,
 })
-  
-const form = useForm({
-  search: props.filters.search,
-  trashed: props.filters.trashed,
-})
     
-watch(
-  () => form,
-  throttle(() => {
-    router.get('/organizations', pickBy(form), { preserveState: true })
-  }, 150),
-  { deep: true }
-)
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    code: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+    name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },    
+})
 
-const reset = () => {
-  form.reset()
+const selected = ref()
+const onRowSelect = (event) => {    
+    router.get(`/organizations/${event.data.code}/edit`)
 }
+
+const create = () => {
+    router.get('/organizations/create')
+};
+
 </script>
 <template>
   <div>
-    <Head title="Organizations" />
-    <h1 class="mb-8 text-3xl font-bold">Organizations</h1>
-    <div class="flex items-center justify-between mb-6">
-      <search-filter v-model="form.search" class="mr-4 w-full max-w-md" @reset="reset">
-        <label class="block text-gray-700">Trashed:</label>
-        <select v-model="form.trashed" class="form-select mt-1 w-full">
-          <option :value="null" />
-          <option value="with">With Trashed</option>
-          <option value="only">Only Trashed</option>
-        </select>
-      </search-filter>
-      <Link class="btn-indigo" href="/organizations/create">
-        <span>Create</span>
-        <span class="hidden md:inline">&nbsp;Organization</span>
-      </Link>
-    </div>
-    <div class="bg-white rounded-md shadow overflow-x-auto">
-      <table class="w-full whitespace-nowrap">
-        <thead>
-          <tr class="text-left font-bold">
-            <th class="pb-4 pt-6 px-6">Name</th>
-            <th class="pb-4 pt-6 px-6">City</th>
-            <th class="pb-4 pt-6 px-6" colspan="2">Phone</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="organization in organizations.data" :key="organization.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
-            <td class="border-t">
-              <Link class="flex items-center px-6 py-4 focus:text-indigo-500" :href="`/organizations/${organization.id}/edit`">
-                {{ organization.name }}
-                <icon v-if="organization.deleted_at" name="trash" class="shrink-0 ml-2 w-3 h-3 fill-gray-400" />
-              </Link>
-            </td>
-            <td class="border-t">
-              <Link class="flex items-center px-6 py-4" :href="`/organizations/${organization.id}/edit`" tabindex="-1">
-                {{ organization.city }}
-              </Link>
-            </td>
-            <td class="border-t">
-              <Link class="flex items-center px-6 py-4" :href="`/organizations/${organization.id}/edit`" tabindex="-1">
-                {{ organization.phone }}
-              </Link>
-            </td>
-            <td class="w-px border-t">
-              <Link class="flex items-center px-4" :href="`/organizations/${organization.id}/edit`" tabindex="-1">
-                <icon name="cheveron-right" class="block w-6 h-6 fill-gray-400" />
-              </Link>
-            </td>
-          </tr>
-          <tr v-if="organizations.data.length === 0">
-            <td class="px-6 py-4 border-t" colspan="4">No organizations found.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <pagination class="mt-6" :links="organizations.links" />
+    <Head title="Организации" />
+
+    <Breadcrumbs :items="[
+      { icon: 'pi-home', label: 'Главная', url: '/' }, 
+      { label: 'Организации' }
+    ]" />    
+    
+    <DataTable 
+      :value="organizations.data" 
+      tableStyle="min-width: 50rem" 
+      :paginator="true" 
+      :rows="10" 
+      :globalFilterFields="['code', 'name']"
+      v-model:filters="filters"
+      showGridlines 
+      dataKey="code"
+      v-model:selection="selected"
+      selectionMode="single"
+      @rowSelect="onRowSelect"     
+    >
+      <template #empty> Нет данных </template>
+      <template #header>
+          <div class="flex justify-end">
+              <Button type="button" class="mr-2" label="Создать" outlined @click="create()" />
+              <span class="relative">
+                  <i class="pi pi-search absolute top-2/4 -mt-2 left-3 text-surface-400 dark:text-surface-600" />
+                  <InputText v-model="filters['global'].value" placeholder="Поиск" class="pl-10 font-normal"/>
+              </span>
+          </div>
+      </template>
+      <Column field="code" header="Код" sortable></Column>
+      <Column field="name" header="Наименование" sortable></Column>      
+    </DataTable>
+
+
   </div>
 </template>
 
