@@ -34,5 +34,9 @@ tests/_support/_generated
 
 /node_modules
 
-/web/*[.svg,.woff2,.woff,.ttf,.oet]
+web/*.svg
+web/*.woff
+web/*.woff2
+web/*.ttf
+web/*.eot
 .phpunit.result.cache
