@@ -5,8 +5,8 @@ import TextInput from "@/Shared/TextInput.vue";
 import LoadingButton from "@/Shared/LoadingButton.vue";
 
 const form = useForm({
-  email: "johndoe@example.com",
-  password: "secret",
+  email: null,
+  password: null,
   remember: false,
 })
 
@@ -22,16 +22,21 @@ const login = () => {
       <logo class="block mx-auto w-full max-w-xs fill-white" height="50" />
       <form class="mt-8 bg-white rounded-lg shadow-xl overflow-hidden" @submit.prevent="login">
         <div class="px-10 py-12">
-          <h1 class="text-center text-3xl font-bold">Welcome Back!</h1>
-          <div class="mt-6 mx-auto w-24 border-b-2" />
-          <text-input v-model="form.email" :error="form.errors.email" class="mt-10" label="Email" type="email" autofocus
-            autocapitalize="off" />
-          <text-input v-model="form.password" :error="form.errors.password" class="mt-6" label="Password"
-            type="password" />
-          <label class="flex items-center mt-6 select-none" for="remember">
-            <input id="remember" v-model="form.remember" class="mr-1" type="checkbox" />
-            <span class="text-sm">Remember Me</span>
-          </label>
+          <h1 class="text-center text-3xl font-bold">Добро пожаловать!</h1>
+          <div class="w-full">
+            <div class="w-full mt-4">
+              <text-input v-model="form.email" :error="form.errors.email" class="pb-8 pr-6 w-full lg:w-1/2" label="Email" type="email" autofocus autocapitalize="off" />
+            </div>
+            <div class="w-full mt-4">
+              <text-input v-model="form.password" :error="form.errors.password" type="password" class="pb-8 pr-6 w-full lg:w-1/2" label="Password" />
+            </div>
+            <div class="w-full mt-4">
+              <label class="flex items-center mt-6 select-none" for="remember">
+                <input id="remember" v-model="form.remember" class="mr-1" type="checkbox" />
+                <span class="text-sm">Запомнить меня</span>
+              </label>
+            </div>
+          </div>          
         </div>
         <div class="flex px-10 py-4 bg-gray-100 border-t border-gray-100">
           <loading-button :loading="form.processing" class="btn-indigo ml-auto" type="submit">Login</loading-button>
