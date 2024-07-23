@@ -38,7 +38,8 @@ class Organization extends ActiveRecord
             [['code', 'name'], 'required'],
             [['created_at', 'updated_at', 'deleted_at'], 'safe'],
             [['code'], 'string', 'max' => 5],
-            [['name'], 'string', 'max' => 250],                        
+            [['name'], 'string', 'max' => 250],
+            [['code'], 'unique'],                        
         ];
     }
 
