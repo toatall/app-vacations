@@ -1,11 +1,20 @@
 <script setup>
-import { Head, Link, router, useForm } from '@inertiajs/vue3'
-import Icon from '@/Shared/Icon.vue'
+import { Head, router } from '@inertiajs/vue3'
 import pickBy from 'lodash/pickBy'
 import Layout from '@/Shared/Layout.vue'
 import throttle from 'lodash/throttle'
-import SearchFilter from '@/Shared/SearchFilter.vue'
-import { watch } from 'vue'
+import { reactive, ref, watch } from 'vue'
+import Breadcrumbs from '@/Shared/Breadcrumbs.vue'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Toolbar from 'primevue/toolbar'
+import IconField from 'primevue/iconfield'
+import Dropdown from 'primevue/dropdown'
+import InputGroup from 'primevue/inputgroup'
+import InputIcon from 'primevue/inputicon'
+import Tag from 'primevue/tag'
 
 defineOptions({
   layout: Layout,  
@@ -15,9 +24,10 @@ defineOptions({
 const props = defineProps({
   filters: Object,
   users: Array,
+  labels: Object,
 })
   
-const form = useForm({
+const form = reactive({
   search: props.filters.search,
   role: props.filters.role,
   trashed: props.filters.trashed,
@@ -32,68 +42,91 @@ watch(
 )
 
 const reset = () => {
-  form.reset()
+  form.search = null
+  form.trashed = null
+  form.role = null
 }
+
+const selected = ref()
+const onRowSelect = (event) => {    
+    router.get(`/users/${event.data.id}/edit`)
+}
+
+const create = () => {
+  router.get('/users/create')
+}
+
+const title = 'Пользователи'
 </script>
 <template>
   <div>
-    <Head title="Users" />
-    <h1 class="mb-8 text-3xl font-bold">Users</h1>
-    <div class="flex items-center justify-between mb-6">
-      <search-filter v-model="form.search" class="mr-4 w-full max-w-md" @reset="reset">
-        <label class="block text-gray-700">Role:</label>
-        <select v-model="form.role" class="form-select mt-1 w-full">
-          <option :value="null" />
-          <option value="user">User</option>
-          <option value="owner">Owner</option>
-        </select>
-        <label class="block mt-4 text-gray-700">Trashed:</label>
-        <select v-model="form.trashed" class="form-select mt-1 w-full">
-          <option :value="null" />
-          <option value="with">With Trashed</option>
-          <option value="only">Only Trashed</option>
-        </select>
-      </search-filter>
-      <Link class="btn-indigo" href="/users/create">
-        <span>Create</span>
-        <span class="hidden md:inline">&nbsp;User</span>
-      </Link>
-    </div>
-    <div class="bg-white rounded-md shadow overflow-x-auto">
-      <table class="w-full whitespace-nowrap">
-        <tr class="text-left font-bold">
-          <th class="pb-4 pt-6 px-6">Name</th>
-          <th class="pb-4 pt-6 px-6">Email</th>
-          <th class="pb-4 pt-6 px-6" colspan="2">Role</th>
-        </tr>
-        <tr v-for="user in users" :key="user.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
-          <td class="border-t">
-            <Link class="flex items-center px-6 py-4 focus:text-indigo-500" :href="`/users/${user.id}/edit`">
-              <img v-if="user.photo" class="block -my-2 mr-2 w-5 h-5 rounded-full" :src="user.photo" />
-              {{ user.name }}
-              <icon v-if="user.deleted_at" name="trash" class="shrink-0 ml-2 w-3 h-3 fill-gray-400" />
-            </Link>
-          </td>
-          <td class="border-t">
-            <Link class="flex items-center px-6 py-4" :href="`/users/${user.id}/edit`" tabindex="-1">
-              {{ user.email }}
-            </Link>
-          </td>
-          <td class="border-t">
-            <Link class="flex items-center px-6 py-4" :href="`/users/${user.id}/edit`" tabindex="-1">
-              {{ user.owner ? 'Owner' : 'User' }}
-            </Link>
-          </td>
-          <td class="w-px border-t">
-            <Link class="flex items-center px-4" :href="`/users/${user.id}/edit`" tabindex="-1">
-              <icon name="cheveron-right" class="block w-6 h-6 fill-gray-400" />
-            </Link>
-          </td>
-        </tr>
-        <tr v-if="users.length === 0">
-          <td class="px-6 py-4 border-t" colspan="4">No users found.</td>
-        </tr>
-      </table>
-    </div>
+    <Head :title="title" />
+    
+    <Breadcrumbs :items="[
+      { icon: 'pi-home', label: 'Главная', url: '/' }, 
+      { label: title }
+    ]" />    
+
+    <DataTable 
+      :value="users" 
+      tableStyle="min-width: 50rem" 
+      :paginator="true" 
+      :rows="10"       
+      showGridlines 
+      dataKey="id"
+      v-model:selection="selected"
+      selectionMode="single"
+      @rowSelect="onRowSelect"     
+    >
+      <template #empty> Нет данных </template>
+      <template #header>          
+        <Toolbar>          
+          <template #start>
+            <div class="grid grid-cols-4 gap-3">
+              <InputGroup class="col-span-2">
+                <IconField iconPosition="left" class="w-full">
+                    <InputIcon>
+                        <i class="pi pi-search" />
+                    </InputIcon>
+                    <InputText placeholder="Поиск" v-model="form.search" />
+                </IconField>                
+              </InputGroup>              
+              <InputGroup>
+                <Dropdown 
+                  v-model="form.trashed" 
+                  :options="[
+                    { name: 'с удаленными', code: 'with' }, 
+                    { name: 'только удаленные', code: 'only' },
+                  ]" 
+                  optionLabel="name" 
+                  optionValue="code"
+                  placeholder="Удаленные" 
+                  class="w-full md:w-[14rem]"
+                  showClear 
+                />
+              </InputGroup>
+              <InputGroup>
+                <Button icon="pi pi-times" size="small" @click="reset" severity="secondary" />
+              </InputGroup>
+            </div>
+          </template>
+
+          <template #end> 
+            <Button @click="create" label="Создать" />
+          </template>
+        </Toolbar>
+
+      </template>
+      <Column field="username" :header="labels.username" sortable>
+        <template #body="{ data }">
+          <div>{{ data.username }}</div>
+          <Tag v-if="data.deleted_at" severity="danger" value="Пользователь удален" class="mt-2" />
+        </template>
+      </Column>
+      <Column field="full_name" :header="labels.full_name" sortable></Column>
+      <Column field="email" :header="labels.email" sortable></Column>  
+      <Column field="org_code" :header="labels.org_code" sortable></Column>    
+    </DataTable>
+
   </div>
 </template>
