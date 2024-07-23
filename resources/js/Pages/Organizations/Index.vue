@@ -59,7 +59,7 @@ const create = () => {
       <template #empty> Нет данных </template>
       <template #header>
           <div class="flex justify-end">
-              <Button type="button" class="mr-2" label="Создать" outlined @click="create()" />
+              <Button type="button" class="mr-2" label="Создать" @click="create()" />
               <span class="relative">
                   <i class="pi pi-search absolute top-2/4 -mt-2 left-3 text-surface-400 dark:text-surface-600" />
                   <InputText v-model="filters['global'].value" placeholder="Поиск" class="pl-10 font-normal"/>
