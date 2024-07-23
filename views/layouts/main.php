@@ -16,6 +16,7 @@ AppAsset::register($this);
     <meta charset="<?= Yii::$app->charset ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">    
     <?php $this->head() ?>    
+    <link rel="icon" type="image/png" sizes="128x128" href="/img/icon-vacation.png">
 </head>
 <body class="font-sans leading-none text-gray-700 antialiased">
 <?php $this->beginBody() ?>
