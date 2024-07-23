@@ -61,10 +61,18 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function attributeLabels()
     {
+        return static::attributeLabelsStatic();
+    }
+    
+    /**
+     * @return string[]
+     */
+    public static function attributeLabelsStatic()
+    {
         return [
             'id' => 'ИД',            
             'username' => 'Учетная запись',
-            'org_code' => 'Код организации',
+            'org_code' => 'Организация',
             'org_code_select' => 'Код организации выбран',
             'full_name' => 'ФИО',
             'email' => 'Email',
@@ -101,6 +109,16 @@ class User extends ActiveRecord implements IdentityInterface
         return parent::beforeSave($insert);
     }
 
+    public function getUserPost()
+    {
+        return $this->post;
+    }
+
+    public function setUserPost($value)
+    {
+        $this->post = $value;
+    }
+
     /**
      * Validates password
      *
@@ -118,10 +136,17 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function findByEmail($email)
     {
-        return static::find()
-            ->where(['email' => $email])
+        return static::findActual()
+            ->andWhere(['email' => $email])
             ->one();
     }
+
+    public static function findActual()
+    {
+        return static::find()
+            ->where(['deleted_at' => null]);
+    }
+
 
     /**
      * {@inheritDoc}
