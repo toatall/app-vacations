@@ -6,12 +6,8 @@ use app\models\Organization;
 use app\fixtures\OrganizationFixture;
 
 class OrganizationTest extends \Codeception\Test\Unit
-{
-    /**
-     * @var \common\tests\UnitTester
-     */
-    protected $tester;
-
+{    
+    
     public function _fixtures()
     {
         return [
@@ -33,7 +29,7 @@ class OrganizationTest extends \Codeception\Test\Unit
     {
         $model = new Organization();
                 
-        // code and name has required
+        // code and name has been required
         $this->assertFalse($model->save());
         $errors = $model->getErrors();
         $this->assertArrayHasKey('code', $errors);
