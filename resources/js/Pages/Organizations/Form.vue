@@ -8,7 +8,12 @@ const props = defineProps({
   form: Object,
   organization: Object,
   labels: Object,
-  isNew: Boolean = true,
+  isNew: {
+    type: Boolean,
+    default() {
+      return true;
+    }
+  },
 })
 
 </script>

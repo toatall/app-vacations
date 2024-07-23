@@ -57,7 +57,7 @@ const restore = () => {
       { label: form.name }
     ]" />
 
-    <Form @save="update" @restore="restore" @destroy="destroy" :organization="organization" :form="form" :labels="labels" />
+    <Form @save="update" @restore="restore" @destroy="destroy" :isNew="false" :organization="organization" :form="form" :labels="labels" />
     
   </div>
 </template>
