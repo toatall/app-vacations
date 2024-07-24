@@ -2,11 +2,23 @@
 
 namespace tests\unit\models;
 
+use app\fixtures\UserFixture;
 use app\models\LoginForm;
 
 class LoginFormTest extends \Codeception\Test\Unit
 {
     private $model;
+
+    public function _fixtures()
+    {
+        return [
+            'user' => [
+                'class' => UserFixture::class,
+                'dataFile' => codecept_data_dir() . 'user.php'
+            ]
+        ];
+    }
+    
 
     protected function _after()
     {
@@ -16,36 +28,36 @@ class LoginFormTest extends \Codeception\Test\Unit
     public function testLoginNoUser()
     {
         $this->model = new LoginForm([
-            'username' => 'not_existing_username',
+            'email' => 'not_existing_email',
             'password' => 'not_existing_password',
         ]);
 
-        expect_not($this->model->login());
-        expect_that(\Yii::$app->user->isGuest);
+        $this->assertFalse($this->model->login());
+        $this->assertTrue(\Yii::$app->user->isGuest);
     }
 
     public function testLoginWrongPassword()
     {
         $this->model = new LoginForm([
-            'username' => 'demo',
+            'email' => 'demo',
             'password' => 'wrong_password',
         ]);
 
-        expect_not($this->model->login());
-        expect_that(\Yii::$app->user->isGuest);
-        expect($this->model->errors)->hasKey('password');
+        $this->assertFalse($this->model->login());
+        $this->assertTrue(\Yii::$app->user->isGuest);        
+        $this->assertArrayHasKey('password', $this->model->errors);
     }
 
     public function testLoginCorrect()
-    {
+    {       
         $this->model = new LoginForm([
-            'username' => 'demo',
-            'password' => 'demo',
+            'email' => 'admin@admin.com',
+            'password' => 'password',
         ]);
-
-        expect_that($this->model->login());
-        expect_not(\Yii::$app->user->isGuest);
-        expect($this->model->errors)->hasntKey('password');
+        $this->model->login();
+        $this->assertTrue($this->model->login());
+        $this->assertFalse(\Yii::$app->user->isGuest);
+        $this->assertArrayNotHasKey('password', $this->model->errors);
     }
 
 }

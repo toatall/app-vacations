@@ -2,53 +2,86 @@ name: Build & Deploy
 
 on: [push]
 
-env:
-  NODE_VERSION: '13.x'
-
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Setup PHP with Composer
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '7.4'
-        tools: composer:v1
-
-    - name: Install composer dependencies
-      run: composer install --no-dev --prefer-dist --no-progress --no-suggest
+  tests:
+    name: PHP ${{ matrix.php }}-pgsql-${{ matrix.mysql }}
+    env:
+      extensions: dom, json, gd, imagick, pdo, pdo_pgsql
+      key: cache-v1
     
-    - name: Migrate database
-      run: |
-        php yii migrate/up --interactive 0
-        php yii db/seed
+    runs-on: ${{ matrix.os }}
 
-    - name: Use Node.js ${{ env.NODE_VERSION }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ env.NODE_VERSION }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
 
-    - name: Install npm dependencies and build JS and CSS
-      run: |
-        npm install
-        npm run dev
-        npm run css-dev
+        php:         
+          - "8.0"
+          - "8.1"
+          - "8.2"
+          - "8.3"
 
-    - name: Cleanup directory
-      run: |
-        rm -rf .git .github node_modules resources tests vagrant
-        rm .bowerrc .gitignore Vagrantfile *.js *.json *.php *.png *.yml
+        pgsql:
+          - "16.3"
+          - "latest"
 
-    - name: Deploy to server via scp
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USERNAME }}
-        password: ${{ secrets.SSH_PASSWORD }}
-        port: 22
-        source: "."
-        target: "/home/tbreusst/public_html/ch.tebe.pingcrm-yii2"
+    services:
+      pgsql:
+        image: postgres:${{ matrix.pgsql }}
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: app-vacations-test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: P@ssw0rd
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup cache environment
+        id: cache-env
+        uses: shivammathur/cache-extensions@v1
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ${{ env.extensions }}
+          key: ${{ env.key }}
+
+      - name: Cache extensions
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.cache-env.outputs.dir }}
+          key: ${{ steps.cache-env.outputs.key }}
+          restore-keys: ${{ steps.cache-env.outputs.key }}
+
+      - name: Install PHP with extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ${{ env.extensions }}
+          ini-values: date.timezone='UTC'
+          coverage: pcov
+
+      - name: Determine composer cache directory on Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: echo "COMPOSER_CACHE_DIR=$(composer config cache-dir)" >> $GITHUB_ENV
+
+      - name: Cache dependencies installed with composer
+        uses: actions/cache@v1
+        with:
+          path: ${{ env.COMPOSER_CACHE_DIR }}
+          key: php${{ matrix.php }}-composer-${{ matrix.dependencies }}-${{ hashFiles('**/composer.json') }}
+          restore-keys: |
+            php${{ matrix.php }}-composer-${{ matrix.dependencies }}-
+
+      - name: Install dependencies with composer
+        run: composer update --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi                 
+
+      - name: Apply migration
+        run: php tests/bin/yii migrate --interactive=0
+
+      - name: Run tests with codeception 
+        run: vendor/bin/codecept run unit
+
