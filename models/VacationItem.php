@@ -64,7 +64,12 @@ class VacationItem extends BaseObject
 
     private function dateToUTC($value)
     {
-        return \Yii::$app->formatter->asDate($value, 'Y-MM-dd');
+        return \Yii::$app->formatter->asDate($value, 'yyyy-MM-dd');
+    }
+
+    public function toArray()
+    {
+        return [$this->dateStart, $this->dateEnd, $this->fullName, $this->department, $this->kindVacation, $this->status];
     }
 
 }

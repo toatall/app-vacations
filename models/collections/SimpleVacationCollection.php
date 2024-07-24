@@ -102,7 +102,7 @@ class SimpleVacationCollection extends AbstractVacationCollection
      */
     protected function getKindVacationFromArray(array $row): string
     {
-        return $row[4];
+        return $this->extractKindVacation($row[4]);
     }
 
     /**
@@ -113,7 +113,7 @@ class SimpleVacationCollection extends AbstractVacationCollection
     private function extractKindVacation($value)
     {
         if (preg_match('/основн/', $value)) {
-            return 'ежегодный основной отпуска';
+            return 'ежегодный основной отпуск';
         }
         if (preg_match('/ненормированный/', $value)) {
             return 'ежегодный дополнительный отпуск за ненормированный рабочий день';
