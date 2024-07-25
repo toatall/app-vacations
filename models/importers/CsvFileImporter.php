@@ -16,8 +16,8 @@ class CsvFileImporter extends AbstractImporter
     {        
         if (($handle = fopen($this->filename, "r")) !== FALSE) {
             while (($data = fgetcsv($handle, null, ",")) !== FALSE) {
-                if (count($data) < 6) {
-                    throw new \Exception('Количество полей должно быть не менее 6');
+                if (count($data) !== 6) {
+                    throw new \Exception('Количество полей должно быть равно 6');
                 }
                 $this->collection->add($data);
             }
