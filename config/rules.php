@@ -32,5 +32,17 @@ return [
     'PUT users/<id:\d+>/restore' => 'user/restore',
 
     'reports' => 'report/index',
-    '500' => 'site/500'
+    '500' => 'site/500',
+
+    // Chart
+    'GET chart/count-of-vacations-per-year-by-day/<code_org:\d+>/<year:\d{4}>' => 'chart/count-of-vacations-per-year-by-day',
+
+    // Statistics    
+    [
+        'pattern' => 'statistics/total-employees/<code_org:\d+>/<year:\d{4}>/<int_days_from:\d+>/<int_days_to:\d+>',
+        'route' => 'statistics/total-employees',
+        'defaults' => ['int_days_from' => 1, 'int_days_to' => 7],
+        'verb' => 'GET',
+    ],
+    'GET statistics/years/<code_org:\d+>' => 'statistics/years',
 ];
