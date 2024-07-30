@@ -2,6 +2,7 @@
 
 namespace app\components;
 
+use app\models\Organization;
 use app\models\User;
 use Yii;
 use yii\base\Action;
@@ -17,10 +18,11 @@ class SharedDataFilter extends ActionFilter
      * @throws \Throwable
      */
     public function beforeAction($action)
-    {
+    {       
         $shared = [
             'auth' => [
-                'user' => $this->getUser()
+                'user' => $this->getUser(),
+                'useWindowsAuthenticate' => Yii::$app->params['useWindowsAuthenticate'],                
             ],
             'flash' => $this->getFlashMessages(),
             'errors' => $this->getErrors(),
@@ -45,21 +47,19 @@ class SharedDataFilter extends ActionFilter
         if ($webUser->isGuest) {
             return null;
         }
-
+                    
         /** @var User */
         $user = $webUser->getIdentity();
 
         $return = [
             'id' => $user->id,
-            'first_name' => $user->first_name,
-            'last_name' => $user->last_name,
+            'username' => $user->username,
+            'full_name' => $user->full_name,
             'email' => $user->email,
-            'role' => null,
-            'account' => [
-                'id' => $user->account->id,
-                'name' => $user->account->name
-            ],
-        ];
+            'roles' => Yii::$app->authManager->getRolesByUser(Yii::$app->user->id),
+            'org_code_select' => $user->org_code_select,
+            'available_organizations' => Organization::findActual()->select('code')->asArray()->all(),
+        ];                    
 
         return $return;
     }
