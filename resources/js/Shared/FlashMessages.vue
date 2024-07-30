@@ -2,6 +2,7 @@
 import { usePage } from '@inertiajs/vue3';
 import { watch } from 'vue';
 import { useToast } from 'primevue/usetoast';
+import Toast from 'primevue/toast';
 
 const page = usePage();
 const toast = useToast();
@@ -42,4 +43,6 @@ watch(
 )
 
 </script>
-<template></template>
+<template>
+  <Toast position="bottom-right" />
+</template>
