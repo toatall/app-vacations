@@ -34,7 +34,23 @@ class CsvFileImporter extends AbstractImporter
     /**
      * {@inheritDoc}
      */
-    protected function getData(): AbstractVacationCollection
+    public function getSource(): string
+    {
+        return 'csv';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getSourceDescription(): string
+    {
+        return $this->filename;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function loadData(): AbstractVacationCollection
     {        
         if (($handle = fopen($this->filename, "r")) !== FALSE) {
             while (($data = fgetcsv($handle, null, $this->csvSeparator)) !== FALSE) {
