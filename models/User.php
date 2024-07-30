@@ -21,6 +21,7 @@ use yii\web\IdentityInterface;
  * @property string|null $email
  * @property string|null $password
  * @property string|null $post
+ * @property string|null $userPost
  * @property string|null $created_at
  * @property string|null $updated_at
  * @property string|null $deleted_at
@@ -29,7 +30,7 @@ class User extends ActiveRecord implements IdentityInterface
 {
     use SoftDeleteTrait;
 
-    public $newPassword;
+    public $newPassword;    
 
     /**
      * {@inheritdoc}
