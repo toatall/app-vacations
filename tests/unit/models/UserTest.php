@@ -70,18 +70,25 @@ class UserTest extends \Codeception\Test\Unit
         $this->assertTrue($user->save());
         $errors = $user->getErrors();
         $this->assertEmpty($errors);
+
+        // post
+        $post = 'System administrator';
+        $user->userPost = $post;
+        $this->assertEquals($post, $user->userPost);
+        $this->assertEquals($post, $user->post);
     }
 
     public function testValidatePassword()
-    {
+    {        
         $user = new User([
             'username' => 'same-user',
             'email' => 'same-user@example.com',
             'newPassword' => 'pass',
+            
         ]);
         $this->assertTrue($user->save());
         $this->assertTrue($user->validatePassword('pass'));
-        $this->assertFalse($user->validatePassword('qwerty'));
+        $this->assertFalse($user->validatePassword('qwerty'));        
     }
 
     public function testFindUserById()
@@ -139,13 +146,13 @@ class UserTest extends \Codeception\Test\Unit
         $attr = [
             'username' => 'toatall',
             'full_name' => 'Oleg',
-            'email' => 'toatall@mail.ru',
+            'email' => 'toatall@mail.ru',            
         ];
         $model = User::fromArray($attr);
         $this->assertInstanceOf(User::class, $model);
         $this->assertEquals($attr['username'], $model->username);
         $this->assertEquals($attr['full_name'], $model->full_name);
-        $this->assertEquals($attr['email'], $model->email);
+        $this->assertEquals($attr['email'], $model->email);        
     }
     
 
