@@ -10,10 +10,15 @@ import ToastService from 'primevue/toastservice'
 
 createInertiaApp({
   resolve: name => require(`./Pages/${name}`),
-  title: title => title ? `${title} - Ping CRM` : 'Ping CRM',
+  title: title => title ? `${title} - График отпусков` : 'График отпусков',
   setup({ el, App, props, plugin }) {
-    createApp({ render: () => h(App, props) })
-      .use(plugin)
+    const app = createApp({ render: () => h(App, props) })
+    
+    // app.config.devtools = true
+    // app.config.debug = true
+    // app.config.silent = false
+
+    app.use(plugin)
       .use(ConfirmationService)
       .use(ToastService)
       .use(PrimeVue, {
