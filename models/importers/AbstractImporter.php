@@ -3,6 +3,7 @@ namespace app\models\importers;
 
 use app\models\collections\AbstractVacationCollection;
 use yii\db\Expression;
+use yii\db\Query;
 
 /**
  * Импорт данных в базу данных
@@ -17,24 +18,32 @@ abstract class AbstractImporter
 
     /**
      * Коллекция элементов VacationItem
-     * @var \app\models\VacationItem[]
+     * @var AbstractVacationCollection|\app\models\VacationItem[]
      */
     protected $collection;
 
     /**
+     * Код организации
      * @var string
      */
     protected $codeOrganization;
+
+    /**
+     * Отчетный год
+     * @var string
+     */
+    protected $year;
 
 
     /**
      * Внедрение класса обработки коллекции
      * @param AbstractVacationCollection $collection
      */
-    public function __construct(AbstractVacationCollection $collection, string $code)
+    public function __construct(AbstractVacationCollection $collection, string $code, string $year)
     {
         $this->collection = $collection;
         $this->codeOrganization = $code;
+        $this->year = $year;
         $this->updateHash = $this->generateUpdateHash();
     }
 
@@ -49,8 +58,7 @@ abstract class AbstractImporter
     /**
      * Обработка (получение) данных из определенного источника
      * Возвращаться должна наполненная коллекция VacationItem
-     * @return \app\models\VacationItem[]
-     * @return \app\models\collections\AbstractVacationCollection
+     * @return \app\models\collections\AbstractVacationCollection|\app\models\VacationItem[]
      */
     abstract protected function getData(): AbstractVacationCollection;
 
@@ -63,7 +71,7 @@ abstract class AbstractImporter
         $data = $this->getData();
         
         // загрузка данных в буферные таблицы
-        $this->insertToBufferTables($data);
+        $this->insertToTables($data);
 
         // очистка таблиц от неактуальных данных
         $this->clearDataInTables();
@@ -77,72 +85,56 @@ abstract class AbstractImporter
     {
         $db = $this->getDb();
         
-        // удаление неактуальных данных из таблицы vacations
+        // удаление неактуальных данных из таблицы vacations_kind
         $db->createCommand(<<<SQL
-            DELETE FROM {{vacations}}
+            DELETE FROM {{vacations_kind}}
             WHERE [[id]] IN (
-                SELECT {{vacations}}.[[id]] FROM {{vacations}}
-                    INNER JOIN {{employees}} ON {{employees}}.[[id]] = {{vacations}}.[[id_employee]]
-                    INNER JOIN {{departments}} ON {{departments}}.[[id]] = {{employees}}.[[id_department]]
-                WHERE {{vacations}}.[[update_hash]]<>:update_hash AND {{departments}}.[[org_code]]=:org_code
-            )
+                SELECT DISTINCT {{vacations_kind}}.[[id]] FROM {{vacations_kind}} 
+                    LEFT JOIN {{vacations}} ON {{vacations}}.[[id_kind]] = {{vacations_kind}}.[[id]]
+                WHERE {{vacations_kind}}.[[org_code]] = :org_code AND {{vacations}}.[[id]] IS NULL
+            )        
         SQL, [
-            ':update_hash' => $this->updateHash,
             ':org_code' => $this->codeOrganization,
         ])->execute();
 
-        // удаление неактуальных данных из таблицы employees
+
+        // удаление неактуальных данных из таблиц departments, employees, vacations
         $db->createCommand(<<<SQL
-            DELETE FROM {{employees}}
+            DELETE FROM {{departments}}
             WHERE [[id]] IN (
-                SELECT {{employees}}.[[id]] FROM {{employees}}                
-                    INNER JOIN {{departments}} ON {{departments}}.[[id]] = {{employees}}.[[id_department]]
+                SELECT {{departments}}.[[id]] FROM {{departments}}
+                    LEFT JOIN {{employees}} ON {{employees}}.[[id_department]] = {{departments}}.[[id]]                                    
+                    LEFT JOIN {{vacations}} ON {{vacations}}.[[id_employee]] = {{employees}}.[[id]]
                 WHERE {{employees}}.[[update_hash]]<>:update_hash AND {{departments}}.[[org_code]]=:org_code
+                    AND DATE_PART('YEAR', {{vacations}}.[[date_from]]) = :year 
             )
         SQL, [
             ':update_hash' => $this->updateHash,
             ':org_code' => $this->codeOrganization,
+            ':year' => $this->year,
         ])->execute();
-
-        // удаление неактуальных данных из таблицы vacations_kind
-        $db->createCommand(<<<SQL
-            DELETE FROM {{vacations_kind}}                                
-            WHERE [[update_hash]]<>:update_hash AND [[org_code]]=:org_code
-        SQL, [
-            ':update_hash' => $this->updateHash,
-            ':org_code' => $this->codeOrganization,
-        ])->execute();
-
-        // удаление неактуальных данных из таблицы vacations_kind
-        $db->createCommand(<<<SQL
-            DELETE FROM {{departments}}                                
-            WHERE [[update_hash]]<>:update_hash AND [[org_code]]=:org_code
-        SQL, [
-            ':update_hash' => $this->updateHash,
-            ':org_code' => $this->codeOrganization,
-        ])->execute();        
     }
 
     /**
-     * Summary of insertToBufferTables
+     * Загрузка данных в таблицы
      * @param \app\models\VacationItem[]|AbstractVacationCollection $collection
      * @return void
      */
-    protected function insertToBufferTables(AbstractVacationCollection $collection)
+    protected function insertToTables(AbstractVacationCollection $collection)
     {
         $db = $this->getDb();       
 
         foreach($collection as $item) {
             
-            // добавление записи об отделе (departments)
-            $db->createCommand()->upsert('departments', [                
+            // добавление записи об отделе (departments)           
+            $this->upsert('departments', [
                 'org_code' => $this->codeOrganization,
                 'name' => $item->department,
-                'update_hash' => $this->updateHash,             
+                'update_hash' => $this->updateHash, 
             ], [
                 'update_hash' => $this->updateHash,
                 'updated_at' => new Expression('NOW()'),
-            ])->execute();
+            ]);
             
             $departmentId = $db->createCommand(
                 'SELECT "id" FROM "departments" WHERE "org_code"=:org_code AND "name"=:name', 
@@ -153,18 +145,16 @@ abstract class AbstractImporter
             }
 
 
-            // добавление записи о виде отпуска (vacations_kind)
-            $db->createCommand()->upsert('vacations_kind', [
-                'org_code' => $this->codeOrganization,
-                'name' => $item->kindVacation,
-                'update_hash' => $this->updateHash,   
+            // добавление записи о виде отпуска (vacations_kind)            
+            $this->upsert('vacations_kind', [
+                'org_code' => $this->codeOrganization,                
+                'name' => $item->kindVacation,                
             ], [
-                'update_hash' => $this->updateHash,
                 'updated_at' => new Expression('NOW()'),
-            ])->execute();
+            ]);
 
             $vacationsKindId = $db->createCommand(
-                'SELECT "id" FROM "vacations_kind" WHERE "name"=:name AND "org_code"=:org_code', 
+                'SELECT [[id]] FROM {{vacations_kind}} WHERE [[name]]=:name AND [[org_code]]=:org_code', 
                 [':org_code' => $this->codeOrganization, ':name' => $item->kindVacation])
             ->queryOne()['id'] ?? null;
             if ($vacationsKindId === null) {
@@ -172,15 +162,15 @@ abstract class AbstractImporter
             }            
             
 
-            // добавление записи о сотруднике (employee)
-            $db->createCommand()->upsert('employees', [
+            // добавление записи о сотруднике (employee)           
+            $this->upsert('employees', [
                 'id_department' => $departmentId,                    
                 'full_name' => $item->fullName,   
                 'update_hash' => $this->updateHash,
             ], [
                 'update_hash' => $this->updateHash,
                 'updated_at' => new Expression('NOW()'),
-            ])->execute();
+            ]);
             
             $employeeId = $db->createCommand(
                 'SELECT "id" FROM "employees" WHERE "id_department"=:id_department AND "full_name"=:full_name', 
@@ -191,8 +181,8 @@ abstract class AbstractImporter
             }    
             
 
-            // добавление записи об отпуске (vacations)
-            $db->createCommand()->upsert('vacations', [
+            // добавление записи об отпуске (vacations)           
+            $this->upsert('vacations', [
                 'id_kind' => $vacationsKindId, 
                 'id_employee' => $employeeId, 
                 'date_from' => $item->dateStartUTC, 
@@ -202,7 +192,7 @@ abstract class AbstractImporter
             ], [
                 'update_hash' => $this->updateHash,
                 'updated_at' => new Expression('NOW()'),
-            ])->execute();
+            ]);
             $vacationId = $db->createCommand(<<<SQL
                 SELECT "id" FROM {{vacations}} 
                 WHERE [[id_kind]]=:id_kind AND [[id_employee]]=:id_employee 
@@ -223,6 +213,65 @@ abstract class AbstractImporter
             
         }
     }
+
+    /**
+     * Вставка или обновление записи
+     * @param string $table таблица
+     * @param array $insert данные для вставки
+     * @param array $update данные для обновления
+     * @return void
+     */
+    protected function upsert(string $table, array $insert, array $update = [])
+    {
+        $db = $this->getDb();
+        $indexColumns = $this->getIndexesByTable($table);
+        $where = array_intersect_key($insert, array_flip($indexColumns));       
+        $query = (new Query())
+            ->from($table)
+            ->where($where)
+            ->exists($db);
+        if (!$query) {
+            $db->createCommand()
+                ->insert($table, $insert)
+                ->execute();
+        }        
+        elseif(!empty($update)) {
+            $db->createCommand()
+                ->update($table, $update, $where)
+                ->execute();
+        }
+    }
+
+    /**
+     * Получение индексов (без первичного ключа) таблицы 
+     * @param string $table наименование таблицы
+     * @return array массив индексов (без первичного ключа)
+     */
+    protected function getIndexesByTable(string $table)
+    {
+        $items = $this->getDb()->createCommand(<<<SQL
+            SELECT   
+                "a"."attname" AS "column_name"	
+            FROM
+                "pg_class" AS "t",
+                "pg_class" AS "i",
+                "pg_index" AS "ix",
+                "pg_attribute" AS "a"
+            WHERE
+                "t"."oid" = "ix"."indrelid"
+                AND "i"."oid" = "ix"."indexrelid"
+                AND "a"."attrelid" = "t"."oid"
+                AND "a"."attnum" = ANY("ix"."indkey")
+                AND "t"."relkind" = 'r'
+                AND "t"."relname" LIKE :table
+                AND "ix"."indisprimary" = FALSE
+            ORDER BY
+                "t"."relname",
+                "i"."relname";
+        SQL, [':table' => "$table%"])->queryAll();        
+        return array_map(fn($item) => $item['column_name'], $items);
+    }
+
 
     /**
      * Генерирование хеша по дате-времени
