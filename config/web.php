@@ -58,6 +58,10 @@ $config = [
                 '@webroot/assets/inertia'
             ],
         ],
+        'session' => [
+            'name' => '_Session',
+            'savePath' => '@app/runtime/sessions'
+        ],
     ],
     'params' => $params,
 ];
