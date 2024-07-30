@@ -24,7 +24,7 @@ class CsvFileImporterTest extends \Codeception\Test\Unit
         $year = '2024';
         $csvFile = \Yii::getAlias('@app/tests/_files/import-data.csv');
         $csvFileImporter = new CsvFileImporter($csvFile, new SimpleVacationCollection($codeOrg), $codeOrg, $year);
-        $csvFileImporter->load();
+        $csvFileImporter->run();
         
         $resQuery = \Yii::$app->db->createCommand('SELECT * FROM "vacations"')->queryAll();
         $this->assertCount(10, $resQuery);
@@ -37,7 +37,7 @@ class CsvFileImporterTest extends \Codeception\Test\Unit
         $csvFile = \Yii::getAlias('@app/tests/_files/import-data-bad-long.csv');
         $csvFileImporter = new CsvFileImporter($csvFile, new SimpleVacationCollection($codeOrg), $codeOrg, $year);
         try {
-            $csvFileImporter->load(); 
+            $csvFileImporter->run(); 
             $this->assertTrue(false);
         }
         catch(\Exception $exception) {
@@ -52,7 +52,7 @@ class CsvFileImporterTest extends \Codeception\Test\Unit
         $csvFile = \Yii::getAlias('@app/tests/_files/import-data-bad-short.csv');
         $csvFileImporter = new CsvFileImporter($csvFile, new SimpleVacationCollection($codeOrg), $codeOrg, $year);
         try {
-            $csvFileImporter->load(); 
+            $csvFileImporter->run(); 
             $this->assertTrue(false);
         }
         catch(\Exception $exception) {
