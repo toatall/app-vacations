@@ -7,6 +7,11 @@ import Lara from '@/presets/lara'
 import Aura from '@/presets/aura'
 import ConfirmationService from 'primevue/confirmationservice'
 import ToastService from 'primevue/toastservice'
+import DialogService from 'primevue/dialogservice'
+import moment from 'moment/moment'
+import Tooltip from 'primevue/tooltip'
+
+moment.locale('ru')
 
 createInertiaApp({
   resolve: name => require(`./Pages/${name}`),
@@ -19,6 +24,7 @@ createInertiaApp({
     // app.config.silent = false
 
     app.use(plugin)
+      .use(DialogService)
       .use(ConfirmationService)
       .use(ToastService)
       .use(PrimeVue, {
@@ -29,6 +35,8 @@ createInertiaApp({
           reject: 'Отмена',           
         }
       })
+      .provide('moment', moment)
+      .directive('tooltip', Tooltip)
       .mount(el)
   },
 })
