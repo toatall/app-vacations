@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\components\SharedDataFilter;
+use app\models\Organization;
 use app\models\User;
 use tebe\inertia\web\Controller;
 use Yii;
@@ -41,15 +42,16 @@ class UserController extends Controller
             $trashed = null;
         }
 
-        $dataProvider = User::findByParams($search, $role, $trashed);
+        $dataProvider = User::findByParams($search, $trashed);
 
         return $this->inertia('Users/Index', [
             'filters' => [
                 'search' => $search,
                 'role' => $role,
-                'trashable' => $trashed,
+                'trashed' => $trashed,
             ],
             'users' => $this->mapUsers($dataProvider->getModels()),
+            'labels' => User::attributeLabelsStatic(),
         ]);
     }
 
@@ -63,10 +65,11 @@ class UserController extends Controller
         $user = User::findById($id);
         if (is_null($user)) {
             throw new HttpException(404);
-        }
-        $user['owner'] = (bool)$user['owner'];
+        }        
         return $this->inertia('Users/Edit', [
-            'user' => $user
+            'user' => $user,
+            'organizations' => Organization::findActual()->asArray()->all(),
+            'labels' => User::attributeLabelsStatic(),
         ]);
     }
 
@@ -75,7 +78,10 @@ class UserController extends Controller
      */
     public function actionCreate()
     {
-        return $this->inertia('Users/Create');
+        return $this->inertia('Users/Create', [
+            'labels' => User::attributeLabelsStatic(),
+            'organizations' => Organization::findActual()->asArray()->all(),
+        ]);
     }
 
     /**
@@ -103,12 +109,8 @@ class UserController extends Controller
         $user = User::findOne($id);
         if (is_null($user)) {
             throw new HttpException(404);
-        }
-        if ($user->email === 'johndoe@example.com') {
-            Yii::$app->session->setFlash('error', 'Updating the demo user is not allowed.');
-            return $this->redirect(['user/edit', 'id' => $id]);
-        }
-        $user->attributes = Yii::$app->request->post();
+        }        
+        $user->attributes = Yii::$app->request->post();        
         if ($user->save()) {
             Yii::$app->session->setFlash('success', 'User updated.');
             return $this->redirect(['user/edit', 'id' => $id]);
@@ -127,11 +129,7 @@ class UserController extends Controller
         $user = User::findOne($id);
         if (is_null($user)) {
             throw new HttpException(404);
-        }
-        if ($user->email === 'johndoe@example.com') {
-            Yii::$app->session->setFlash('error', 'Deleting the demo user is not allowed.');
-            return $this->redirect(['user/edit', 'id' => $id]);
-        }
+        }        
         if ($user->delete() > 0) {
             Yii::$app->session->setFlash('success', 'User deleted.');
         }
@@ -160,12 +158,7 @@ class UserController extends Controller
      * @return array
      */
     private function mapUsers(array $users)
-    {
-        return array_map(function ($row) {
-            $row['name'] = $row['first_name'] . ' ' . $row['last_name'];
-            $row['owner'] = (bool)$row['owner'];
-            unset($row['first_name'], $row['last_name']);
-            return $row;
-        }, $users);
+    {       
+        return $users;
     }
 }
