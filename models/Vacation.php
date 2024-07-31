@@ -1,71 +1,67 @@
 <?php
-
 namespace app\models;
 
-use Yii;
-
-/**
- * This is the model class for table "vacations".
- *
- * @property int $id
- * @property int $id_kind
- * @property int $id_employee
- * @property string $date_from
- * @property string $date_to
- * @property string $status
- * @property string|null $created_at
- *
- * @property Employee $employee
- */
-class Vacation extends \yii\db\ActiveRecord
+class Vacation
 {
+
     /**
-     * {@inheritdoc}
+     * Сотрудники в отпуске
+     * @param mixed $codeOrganization
+     * @param mixed $year
+     * @return array
      */
-    public static function tableName()
+    public static function employeesOnVacations(string $codeOrganization, string $year)
     {
-        return 'vacations';
+        $result = \Yii::$app->getDb()->createCommand(<<<SQL
+            SELECT DISTINCT                
+                {{employees}}.[[full_name]]
+                ,{{employees}}.[[post]]
+                ,{{departments}}.[[name]]
+                ,{{vacations_merged}}.[[date_from]]
+                ,{{vacations_merged}}.[[date_to]]                
+            FROM {{employees}}
+                RIGHT JOIN {{departments}} ON {{departments}}.[[id]] = {{employees}}.[[id_department]]
+                LEFT JOIN {{vacations_merged}} ON {{vacations_merged}}.[[id_employee]] = {{employees}}.[[id]]                
+            WHERE {{departments}}.[[org_code]] = :org_code 
+                AND NOW() BETWEEN {{vacations_merged}}.[[date_from]] AND {{vacations_merged}}.[[date_to]]
+                AND  {{vacations_merged}}.[[year]] = :year
+        SQL, [
+            ':org_code' => $codeOrganization,
+            ':year' => $year,
+        ])->queryAll();
+        return $result;
     }
 
     /**
-     * {@inheritdoc}
+     * Сотрудники идущие в отпуск в указанный интервал
+     * @param string $codeOrganization код организации
+     * @param string $year отчетный год
+     * @param int $intervalDaysFrom интервал дней (от) (по умолчанию 1)
+     * @param int $intervalDaysTo интервал дней (до) (по умолчанию 7)
+     * @return array
      */
-    public function rules()
+    public static function employeesWillBeOnVacations(string $codeOrganization, string $year, int $intervalDaysFrom, int $intervalDaysTo)
     {
-        return [
-            [['id_kind', 'id_employee', 'date_from', 'date_to', 'status'], 'required'],
-            [['id_kind', 'id_employee'], 'default', 'value' => null],
-            [['id_kind', 'id_employee'], 'integer'],
-            [['date_from', 'date_to', 'created_at'], 'safe'],
-            [['status'], 'string', 'max' => 5],
-            [['id_employee'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['id_employee' => 'id']],            
-        ];
+        $result = \Yii::$app->getDb()->createCommand(<<<SQL
+            SELECT DISTINCT                
+                {{employees}}.[[full_name]]
+                ,{{employees}}.[[post]]
+                ,{{departments}}.[[name]]
+                ,{{vacations_merged}}.[[date_from]]
+                ,{{vacations_merged}}.[[date_to]]                
+            FROM {{employees}}
+                RIGHT JOIN {{departments}} ON {{departments}}.[[id]] = {{employees}}.[[id_department]]
+                LEFT JOIN {{vacations_merged}} ON {{vacations_merged}}.[[id_employee]] = {{employees}}.[[id]]                
+            WHERE {{departments}}.[[org_code]] = :org_code 
+            AND {{vacations_merged}}.[[date_from]] BETWEEN (NOW() + MAKE_INTERVAL(DAYS => :intervalDaysFrom))::DATE AND (NOW() + MAKE_INTERVAL(DAYS => :intervalDaysTo))::DATE
+                AND  {{vacations_merged}}.[[year]] = :year
+        SQL, [
+            ':org_code' => $codeOrganization,
+            ':year' => $year,
+            ':intervalDaysFrom' => $intervalDaysFrom,
+            ':intervalDaysTo' => $intervalDaysTo,
+        ])->queryAll();
+        return $result;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ИД',
-            'id_kind' => 'Вид отпуска',
-            'id_employee' => 'Сотрудник',
-            'date_from' => 'Дата начала',
-            'date_to' => 'Дата окончания',
-            'status' => 'Статус',
-            'created_at' => 'Дата создания',
-        ];
-    }
-
-    /**
-     * Gets query for [[Employee]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getEmployee()
-    {
-        return $this->hasOne(Employee::class, ['id' => 'id_employee']);
-    }
-    
 }
