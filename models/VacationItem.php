@@ -29,6 +29,12 @@ class VacationItem extends BaseObject
     public $fullName;
 
     /**
+     * Должность
+     * @var string
+     */
+    public $post;
+
+    /**
      * Код организации
      * @var string
      */
