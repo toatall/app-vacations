@@ -1,6 +1,5 @@
 <?php
 
-use yii\db\Expression;
 use yii\db\Migration;
 
 /**
@@ -20,8 +19,8 @@ class m240718_062047_create_vacations_table extends Migration
             'date_from' => $this->date()->notNull(),
             'date_to' => $this->date()->notNull(),
             'status' => $this->string(5)->notNull(),
-            'created_at' => $this->dateTime()->notNull()->defaultValue(new Expression('NOW()')),
-            'updated_at' => $this->dateTime()->notNull()->defaultValue(new Expression('NOW()')),
+            'created_at' => $this->dateTime()->notNull()->defaultExpression('NOW()'),
+            'updated_at' => $this->dateTime()->notNull()->defaultExpression('NOW()'),
             'update_hash' => $this->string(32)->notNull(),
         ]);
         $this->addForeignKey('fk__vacations__id_kind', 'vacations', 'id_kind', 'vacations_kind', 'id', 'CASCADE');
