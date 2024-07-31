@@ -1,6 +1,5 @@
 <script setup>
 import { Link, router } from '@inertiajs/vue3'
-import Icon from '@/Shared/Icon.vue'
 import Logo from '@/Shared/Logo.vue'
 import Dropdown from '@/Shared/Dropdown.vue'
 import MainMenu from '@/Shared/MainMenu.vue'
@@ -10,19 +9,27 @@ import ConfirmDialog from 'primevue/confirmdialog'
 import Button from 'primevue/button'
 import Menu from 'primevue/menu'
 import axios from 'axios'
+import routes from '@/Config/routes'
+import DynamicDialog from 'primevue/dynamicdialog'
 
 const props = defineProps({
     auth: Object,
 })
 
-const menu = ref();
 
-const menuItems = computed(() =>{
+/** Menu organization start */
+
+const menuOrganizations = ref();
+
+const menuItemsOrganizations = computed(() =>{  
   return props.auth?.user?.available_organizations?.map(element => ({
     label: element.code,   
     command: () => {
       changeOrganization(element.code)
-    } 
+    },
+    icon: element.code == props.auth.user.org_code_select ? 'pi pi-check-circle' : 'pi pi-circle',
+    class: element.code == props.auth.user.org_code_select ? 'font-bold' : '',
+    disabled: element.code == props.auth.user.org_code_select,
   })) || [];
 });
 
@@ -33,16 +40,47 @@ const changeOrganization = (code) => {
     }
 }
 
-const items = ref([
+const itemsOrganizations = ref([
     {
         label: 'Организации',
-        items: menuItems,        
+        items: menuItemsOrganizations,        
     }
 ]);
 
-const toggle = (event) => {
-    menu.value.toggle(event);
+const toggleOrganizations = (event) => {
+    menuOrganizations.value.toggle(event);
 };
+
+/** Menu organization end */
+
+
+/** Menu profile start */
+
+const menuProfile = ref()
+
+const itemsProfile = [
+  {
+    icon: 'pi pi-user-edit',
+    label: 'Профиль',
+    command: () => router.get(routes.profile(props.auth.user.id)),    
+  },
+  {
+    icon: 'pi pi-users',
+    label: 'Управление пользователями',
+    command: () => router.get(routes.manageUsers()),
+  },
+  {
+    icon: 'pi pi-sign-out',
+    label: 'Выход',
+    command: () => router.delete(routes.logout()),
+  },
+]
+
+const toggleProfile = (event) => {
+  menuProfile.value.toggle(event);
+}
+
+/** Menu profile end */
 
 </script>
 <template>
@@ -50,7 +88,7 @@ const toggle = (event) => {
     <div id="dropdown" />
     <div class="md:flex md:flex-col">
       <div class="md:flex md:flex-col md:h-screen">
-        <div class="md:flex md:shrink-0">
+        <div class="md:flex md:shrink-0">          
           <div class="flex items-center justify-between px-6 py-4 bg-indigo-900 md:shrink-0 md:justify-center md:w-56">
             <Link class="mt-1" href="/">
               <logo class="fill-white" width="120" height="28" />
@@ -74,32 +112,23 @@ const toggle = (event) => {
             </div>
             <div class="flex">             
               <div>
-                <Button link severity="secondary" class="me-2" @click="toggle" aria-controls="overlay_menu">
+                <Button link severity="secondary" class="me-2" @click="toggleOrganizations" aria-controls="overlay_menu">
                   <span class="text-nowrap">
                     {{ auth.user.org_code_select ?? 'Не выбрана' }}
                     <i class="pi pi-chevron-down"></i>
                   </span>
                 </Button>
-                <Menu ref="menu" id="overlay_menu" :model="items" :popup="true" />
+                <Menu ref="menuOrganizations" id="overlay_menu" :model="itemsOrganizations" :popup="true" />
               </div>
-              <dropdown class="mt-1" placement="bottom-end">
-                <template #default>
-                  <div class="group flex items-center cursor-pointer select-none">                  
-                    <div class="mr-1 text-gray-700 group-hover:text-indigo-600 focus:text-indigo-600 whitespace-nowrap">
-                      <span>{{ auth.user.first_name }}</span>
-                      <span class="hidden md:inline">&nbsp;{{ auth.user.full_name ?? auth.user.username }}</span>
-                    </div>
-                    <icon class="w-5 h-5 fill-gray-700 group-hover:fill-indigo-600 focus:fill-indigo-600" name="cheveron-down" />
-                  </div>
-                </template>
-                <template #dropdown>
-                  <div class="mt-2 py-2 text-sm bg-white rounded shadow-xl">
-                    <Link class="block px-6 py-2 hover:text-white hover:bg-indigo-500" :href="`/users/${auth.user.id}/edit`">Профиль</Link>
-                    <Link class="block px-6 py-2 hover:text-white hover:bg-indigo-500" href="/users">Управление пользователями</Link>
-                    <Link class="block px-6 py-2 w-full text-left hover:text-white hover:bg-indigo-500" href="/logout" method="delete" as="button">Выход</Link>
-                  </div>
-                </template>
-              </dropdown>
+              <div>
+                <Button link severity="secondary" class="me-2" @click="toggleProfile" aria-controls="overlay_menu">
+                  <span class="text-nowrap">
+                    {{ auth.user.full_name ?? auth.user.username }}
+                    <i class="pi pi-chevron-down"></i>
+                  </span>
+                </Button>
+                <Menu ref="menuProfile" id="overlay_menu" :model="itemsProfile" :popup="true" />
+              </div>             
             </div>
           </div>
         </div>
@@ -113,5 +142,6 @@ const toggle = (event) => {
       </div>
     </div>
   </div>
-  <ConfirmDialog></ConfirmDialog>  
+  <ConfirmDialog></ConfirmDialog>
+  <DynamicDialog />
 </template>
