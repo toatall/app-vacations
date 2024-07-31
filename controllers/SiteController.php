@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\components\SharedDataFilter;
 use app\models\LoginForm;
+use app\models\Vacation;
 use tebe\inertia\web\Controller;
 use Yii;
 use yii\filters\AccessControl;
@@ -29,12 +30,6 @@ class SiteController extends Controller
                         'allow' => true,
                         'roles' => ['@']
                     ]
-                ]
-            ],
-            [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'logout' => ['post']
                 ]
             ],
             [
@@ -65,6 +60,20 @@ class SiteController extends Controller
     public function actionIndex()
     {
         return $this->inertia('Dashboard/Index');
+    }    
+
+    public function actionChangeOrganization()
+    {        
+        $code = Yii::$app->request->post('code');
+        if (Yii::$app->user->isGuest) {
+            return false;
+        }
+        /** @var \app\models\User $user */
+        $user = Yii::$app->user->identity;       
+        $user->org_code_select = $code;        
+        $user->save(false, ['org_code_select']);
+        Yii::$app->session->remove('user');
+        Yii::$app->session->setFlash('success', 'Организация изменена');
     }
 
     /**
@@ -85,9 +94,10 @@ class SiteController extends Controller
                 return $this->goBack();
             }
             Yii::$app->session->setFlash('errors', $model->getErrors());
+            return $this->redirect(['login']);
         }
 
-        return $this->inertia('Auth/Login');
+        return $this->inertia('Auth/Login');        
     }
 
     /**
@@ -105,6 +115,6 @@ class SiteController extends Controller
     public function action500()
     {
         sleep(1);
-        throw new ServerErrorHttpException('An unexpected error happend.');
+        throw new ServerErrorHttpException('An unexpected error happened.');
     }
 }
