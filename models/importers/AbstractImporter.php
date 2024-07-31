@@ -115,6 +115,7 @@ abstract class AbstractImporter
         try {            
             $data = $this->getLoadData();
             $this->saveDataToDb($data);
+            $this->mergeVacations();
             $this->purgeData();
         }
         catch (LoadDataException $ex) {
@@ -177,16 +178,34 @@ abstract class AbstractImporter
                         LEFT JOIN {{employees}} ON {{employees}}.[[id_department]] = {{departments}}.[[id]]                                    
                         LEFT JOIN {{vacations}} ON {{vacations}}.[[id_employee]] = {{employees}}.[[id]]
                     WHERE {{employees}}.[[update_hash]]<>:update_hash AND {{departments}}.[[org_code]]=:org_code
-                        AND DATE_PART('YEAR', {{vacations}}.[[date_from]]) = :year 
+                        AND {{departments}}.[[year]] = :year
+                        --AND DATE_PART('YEAR', {{vacations}}.[[date_from]]) = :year 
                 )
             SQL, [
                 ':update_hash' => $this->updateHash,
                 ':org_code' => $this->codeOrganization,
                 ':year' => $this->year,
             ])->execute();
+
+
+            // удаление неактуальных данных из таблицы vacations_merged
+            $db->createCommand(<<<SQL
+                DELETE FROM {{vacations_merged}}
+                WHERE [[id]] IN (
+                    SELECT {{vacations_merged}}.[[id]] FROM {{vacations_merged}}
+                        RIGHT JOIN {{employees}} ON {{employees}}.[[id]] = {{vacations_merged}}.[[id_employee]]  
+                        RIGHT JOIN {{departments}} ON {{departments}}.[[id]] = {{employees}}.[[id_department]]
+                    WHERE {{departments}}.[[org_code]] = :org_code AND {{vacations_merged}}.[[year]] = :year 
+                        AND {{vacations_merged}}.[[update_hash]] <> :update_hash                
+                )
+            SQL, [                
+                ':org_code' => $this->codeOrganization,
+                ':year' => $this->year,
+                ':update_hash' => $this->updateHash,
+            ])->execute();
         }
         catch (\Exception $ex) {
-            throw new PurgeDataException($ex->getMessage(), $ex->getCode(), $ex);
+            throw new PurgeDataException($ex->getMessage(), 0, $ex);
         }
     }
 
@@ -205,6 +224,7 @@ abstract class AbstractImporter
                 // добавление записи об отделе (departments)           
                 $this->upsert('departments', [
                     'org_code' => $this->codeOrganization,
+                    'year' => $this->year,
                     'name' => $item->department,
                     'update_hash' => $this->updateHash, 
                 ], [
@@ -213,8 +233,8 @@ abstract class AbstractImporter
                 ]);
                 
                 $departmentId = $db->createCommand(
-                    'SELECT "id" FROM "departments" WHERE "org_code"=:org_code AND "name"=:name', 
-                    ['org_code' => $this->codeOrganization, ':name' => $item->department]
+                    'SELECT "id" FROM "departments" WHERE "org_code"=:org_code AND "name"=:name AND "year"=:year', 
+                    ['org_code' => $this->codeOrganization, ':name' => $item->department, ':year' => $this->year]
                 )->queryOne()['id'] ?? null;
                 if ($departmentId === null) {
                     throw new \Exception('Не удалось получить id из таблицы departments');
@@ -242,6 +262,7 @@ abstract class AbstractImporter
                 $this->upsert('employees', [
                     'id_department' => $departmentId,                    
                     'full_name' => $item->fullName,   
+                    'post' => $item->post,
                     'update_hash' => $this->updateHash,
                 ], [
                     'update_hash' => $this->updateHash,
@@ -290,7 +311,28 @@ abstract class AbstractImporter
             }
         }
         catch (\Exception $ex) {
-            throw new SaveDataToDbException($ex->getMessage(), $ex->getCode(), $ex);
+            throw new SaveDataToDbException($ex->getMessage(), 0, $ex);
+        }
+    }
+
+    /**
+     * Объединение отпусков (следующих друг за другом)
+     * @return void
+     */
+    protected function mergeVacations()
+    {
+        try {
+            $db = $this->getDb();
+            $db->createCommand(<<<SQL
+                CALL public.merge_vacations(:org_code, :year, :update_hash)              
+            SQL, [
+                ':org_code' => $this->codeOrganization,
+                ':year' => $this->year,
+                ':update_hash' => $this->updateHash,
+            ])->execute();
+        }
+        catch (\Exception $ex) {
+            throw new SaveDataToDbException($ex->getMessage(), 0, $ex);
         }
     }
 
