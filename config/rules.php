@@ -45,4 +45,14 @@ return [
         'verb' => 'GET',
     ],
     'GET statistics/years/<code_org:\d+>' => 'statistics/years',
+
+    // Vacations
+    'GET vacations/employees-on-vacations/<code_org:\d+>/<year:\d{4}>' => 'vacations/employees-on-vacations',
+    [
+        'pattern' => 'vacations/employees-will-be-on-vacations/<code_org:\d+>/<year:\d{4}>/<int_days_from:\d+>/<int_days_to:\d+>',
+        'route' => 'vacations/employees-will-be-on-vacations',
+        'defaults' => ['int_days_from' => 1, 'int_days_to' => 7],
+        'verb' => 'GET',
+    ],
+
 ];
