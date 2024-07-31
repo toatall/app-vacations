@@ -1,6 +1,5 @@
 <?php
 
-use yii\db\Expression;
 use yii\db\Migration;
 
 /**
@@ -16,9 +15,10 @@ class m240718_061819_create_employees_table extends Migration
         $this->createTable('employees', [
             'id' => $this->primaryKey(),
             'id_department' => $this->integer()->notNull(),            
-            'full_name' => $this->string(250)->notNull(),            
-            'created_at' => $this->dateTime()->notNull()->defaultValue(new Expression('NOW()')),
-            'updated_at' => $this->dateTime()->notNull()->defaultValue(new Expression('NOW()')),
+            'full_name' => $this->string(250)->notNull(),   
+            'post' => $this->string(250)->null(),         
+            'created_at' => $this->dateTime()->notNull()->defaultExpression('NOW()'),
+            'updated_at' => $this->dateTime()->notNull()->defaultExpression('NOW()'),
             'update_hash' => $this->string(32)->notNull(),
         ]);
         $this->createIndex('unique__employees', 'employees', ['id_department', 'full_name'], true);
