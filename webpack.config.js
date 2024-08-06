@@ -1,13 +1,14 @@
 // webpack.config.js
 const path = require('path');
 const webpack = require('webpack')
+const {VueLoaderPlugin} = require('vue-loader');
 
 const PATHS = {
     source: path.join(__dirname, 'resources/js'),
     build: path.join(__dirname, 'web')
 };
 
-const {VueLoaderPlugin} = require('vue-loader');
+
 
 module.exports = (env, argv) => {
     let config = {
@@ -37,7 +38,11 @@ module.exports = (env, argv) => {
                 {
                     test: /\.css$/i,
                     use: ['style-loader', 'css-loader']
-                }
+                },
+                {
+                    test: /\.worker\.js$/,
+                    use: { loader: "worker-loader" },
+                },
             ]
         },
         plugins: [
