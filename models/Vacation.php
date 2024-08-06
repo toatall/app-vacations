@@ -64,4 +64,47 @@ class Vacation
         return $result;
     }
 
+    /**
+     * Список сотрудников с отпусками
+     * @param string $codeOrganization код организации
+     * @param string $year отчетный год
+     * @return array
+     */
+    public static function vacationsPerDayByDepartments(string $codeOrganization, string $year)
+    {
+        $result = \Yii::$app->getDb()->createCommand(<<<SQL
+            
+            SELECT 
+                {{departments}}.[[id]] AS "id_department"
+                ,{{departments}}.[[name]] AS "department"
+                ,{{departments}}.[[sort_index]] AS "sort_index_department"
+                ,{{employees}}.[[id]] AS "id_employee"
+                ,{{employees}}.[[full_name]]
+                ,{{employees}}.[[post]]
+                ,{{employees}}.[[sort_index]] AS "sort_index_employee"
+                ,{{vacations}}.[[date_from]]
+                ,{{vacations}}.[[date_to]]
+                ,{{vacations}}.[[status]]                
+                ,{{vacations}}.[[id_kind]]
+                ,{{vacations_kind}}.[[name]] AS "vacation_kind"
+            FROM {{departments}}
+                LEFT JOIN {{employees}} ON {{employees}}.[[id_department]] = {{departments}}.[[id]]
+                LEFT JOIN {{vacations}} ON {{vacations}}.[[id_employee]] = {{employees}}.[[id]]
+                LEFT JOIN {{vacations_kind}} ON {{vacations_kind}}.[[id]] = {{vacations}}.[[id_kind]]
+            WHERE {{departments}}.[[org_code]] = :org_code AND {{departments}}.[[year]] = :year
+            ORDER BY 
+                {{departments}}.[[sort_index]] ASC
+                ,{{departments}}.[[name]] ASC
+                ,{{employees}}.[[sort_index]] ASC
+                ,{{employees}}.[[full_name]] ASC
+                ,{{vacations}}.[[date_from]] ASC
+
+        SQL, [
+            ':org_code' => $codeOrganization,
+            ':year' => $year,
+        ])->queryAll();
+
+        return $result;
+    }
+
 }
