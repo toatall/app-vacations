@@ -1,5 +1,7 @@
 import '../css/app.css'
 import 'primeicons/primeicons.css'
+import 'animate.css'
+
 import { createApp, h } from 'vue'
 import { createInertiaApp } from '@inertiajs/vue3'
 import PrimeVue from 'primevue/config'
