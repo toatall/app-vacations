@@ -55,4 +55,8 @@ return [
         'verb' => 'GET',
     ],
 
+    // Table
+    'GET table/index' => 'table/index',
+    'GET table/table-data/<code_org:\d+>/<year:\d{4}>' => 'table/table-data',
+
 ];

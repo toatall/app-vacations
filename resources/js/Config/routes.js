@@ -14,6 +14,14 @@ export default {
   // выход
   logout: () => '/logout',
 
+  // организации
+  organizations: () => '/organizations',
+
+  // табель отпусков
+  table: () => '/table',
+
+
+
   // статистика для главной страницы
   statisticsTotalEmployees: function (orgCode, year) {
     return `/statistics/total-employees/${orgCode}/${year}`;
@@ -33,5 +41,11 @@ export default {
   chartCountOfVacationsPerYearByDay: function (orgCode, year) {
     return `/chart/count-of-vacations-per-year-by-day/${orgCode}/${year}`;
   },
+
+  // данные об отпуске по каждому сотруднику
+  tableData: function (org_code, year) {
+    return `/table/table-data/${org_code}/${year}`;
+  },
+  
 
 }
