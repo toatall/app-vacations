@@ -1,41 +1,39 @@
 <script setup>
 import { Link, usePage } from '@inertiajs/vue3'
-import Icon from '@/Shared/Icon.vue'
+import routes from '@/Config/routes';
 
 const page = usePage()
 
-const isUrl = (...urls) => {
-  let currentUrl = page.url.substr(1)
-  if (urls[0] === '') {
-    return currentUrl === ''
-  }
-  return urls.filter((url) => currentUrl.startsWith(url)).length
+const isUrl = (url) => {
+  let currentUrl = page.url;
+  return url == currentUrl;  
 }
+
+const urlHome = routes.home()
+const urlOrganizations = routes.organizations()
+const urlTable = routes.table()
+
+
 </script>
 <template>
   <div>
     <div class="mb-4">
-      <Link class="group flex items-center py-3" href="/">
-        <icon name="dashboard" class="mr-2 w-4 h-4" :class="isUrl('') ? 'fill-white' : 'fill-indigo-400 group-hover:fill-white'" />
-        <div :class="isUrl('') ? 'text-white' : 'text-indigo-300 group-hover:text-white'">Главная</div>
+      <Link class="group flex items-center py-3" :href="urlHome" :class="isUrl(urlHome) ? 'text-white' : 'text-indigo-300 group-hover:text-white'">
+        <i class="pi pi-gauge me-2"></i>
+        <div >Главная</div>
       </Link>
-    </div>
+    </div>    
     <div class="mb-4">
-      <Link class="group flex items-center py-3" href="/organizations">
-        <icon name="office" class="mr-2 w-4 h-4" :class="isUrl('organizations') ? 'fill-white' : 'fill-indigo-400 group-hover:fill-white'" />
-        <div :class="isUrl('organizations') ? 'text-white' : 'text-indigo-300 group-hover:text-white'">Организации</div>
+      <Link class="group flex items-center py-3" :href="urlTable" :class="isUrl(urlTable) ? 'text-white' : 'text-indigo-300 group-hover:text-white'">
+        <i class="pi pi-table me-2"></i>
+        <div>Табель</div>
       </Link>
-    </div>
+    </div>    
+
     <div class="mb-4">
-      <Link class="group flex items-center py-3" href="/contacts">
-        <icon name="users" class="mr-2 w-4 h-4" :class="isUrl('contacts') ? 'fill-white' : 'fill-indigo-400 group-hover:fill-white'" />
-        <div :class="isUrl('contacts') ? 'text-white' : 'text-indigo-300 group-hover:text-white'">Contacts</div>
-      </Link>
-    </div>
-    <div class="mb-4">
-      <Link class="group flex items-center py-3" href="/reports">
-        <icon name="printer" class="mr-2 w-4 h-4" :class="isUrl('reports') ? 'fill-white' : 'fill-indigo-400 group-hover:fill-white'" />
-        <div :class="isUrl('reports') ? 'text-white' : 'text-indigo-300 group-hover:text-white'">Reports</div>
+      <Link class="group flex items-center py-3" :href="urlOrganizations" :class="isUrl(urlOrganizations) ? 'text-white' : 'text-indigo-300 group-hover:text-white'">
+        <i class="pi pi-building-columns me-2"></i>
+        <div>Организации</div>
       </Link>
     </div>
   </div>
