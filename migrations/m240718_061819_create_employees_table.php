@@ -14,8 +14,9 @@ class m240718_061819_create_employees_table extends Migration
     {
         $this->createTable('employees', [
             'id' => $this->primaryKey(),
-            'id_department' => $this->integer()->notNull(),            
+            'id_department' => $this->integer()->notNull(),              
             'full_name' => $this->string(250)->notNull(),   
+            'sort_index' => $this->string(10),
             'post' => $this->string(250)->null(),         
             'created_at' => $this->dateTime()->notNull()->defaultExpression('NOW()'),
             'updated_at' => $this->dateTime()->notNull()->defaultExpression('NOW()'),

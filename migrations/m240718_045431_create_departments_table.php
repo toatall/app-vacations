@@ -15,8 +15,9 @@ class m240718_045431_create_departments_table extends Migration
         $this->createTable('departments', [
             'id' => $this->primaryKey(),
             'org_code' => $this->string(5)->notNull(),
-            'year' => $this->string(4)->notNull(),
+            'year' => $this->string(4)->notNull(),            
             'name' => $this->string(200)->notNull(),
+            'sort_index' => $this->string(10),
             'created_at' => $this->dateTime()->notNull()->defaultExpression('NOW()'),
             'updated_at' => $this->dateTime()->notNull()->defaultExpression('NOW()'),
             'update_hash' => $this->string(32)->notNull(),
