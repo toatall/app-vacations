@@ -26,6 +26,7 @@
   "dependencies": {
     "@inertiajs/vue3": "^1.2.0",
     "@popperjs/core": "^2.11.8",
+    "animate.css": "^4.1.1",
     "apexcharts": "^3.51.0",
     "axios": "^1.7.2",
     "lodash": "^4.17.21",
@@ -49,6 +50,7 @@
     "vue-loader": "^17.4.2",
     "vue-style-loader": "^4.1.2",
     "webpack": "5.93",
-    "webpack-cli": "^5.1.4"
+    "webpack-cli": "^5.1.4",
+    "worker-loader": "^3.0.8"
   }
 }
