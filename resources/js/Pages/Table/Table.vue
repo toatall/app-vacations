@@ -88,7 +88,7 @@ const itemsMenuTable = ref([
   {
     items: [
       {        
-        label: computed(() => isFullscreen.value ? 'Свернуть' : 'Развернуть' ),
+        label: computed(() => isFullscreen.value ? 'Свернуть' : 'Развернуть на весь экран' ),
         icon: computed(() => isFullscreen.value ? 'pi pi-window-minimize' : 'pi pi-window-maximize'),
         command: () => isFullscreen.value = !isFullscreen.value,
       },
