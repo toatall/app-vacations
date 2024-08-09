@@ -8,6 +8,7 @@ use app\models\User;
 use tebe\inertia\web\Controller;
 use Yii;
 use yii\filters\AccessControl;
+use yii\web\ForbiddenHttpException;
 use yii\web\HttpException;
 use yii\web\Response;
 
@@ -23,9 +24,15 @@ class UserController extends Controller
                 'class' => AccessControl::class,
                 'rules' => [
                     [
+                        'actions' => ['edit', 'update'],
                         'allow' => true,
                         'roles' => ['@'],
-                    ]
+                    ],
+                    [
+                        'actions' => ['index', 'create', 'insert', 'delete', 'restore'],
+                        'allow' => true,
+                        'roles' => ['admin'],
+                    ],
                 ]
             ],
             [
@@ -34,6 +41,14 @@ class UserController extends Controller
         ];
     }
 
+    /**
+     * Главная страница
+     * @param string|null $search
+     * @param string|null $role
+     * @param string|null $trashed
+     * @param string|null $remember
+     * @return array|string
+     */
     public function actionIndex($search = null, $role = null, $trashed = null, $remember = null)
     {
         if ($remember === 'forget') {
@@ -56,24 +71,7 @@ class UserController extends Controller
     }
 
     /**
-     * @param int $id
-     * @return array|string
-     * @throws HttpException
-     */
-    public function actionEdit($id)
-    {
-        $user = User::findById($id);
-        if (is_null($user)) {
-            throw new HttpException(404);
-        }        
-        return $this->inertia('Users/Edit', [
-            'user' => $user,
-            'organizations' => Organization::findActual()->asArray()->all(),
-            'labels' => User::attributeLabelsStatic(),
-        ]);
-    }
-
-    /**
+     * Форма создания пользователя
      * @return array|string
      */
     public function actionCreate()
@@ -85,6 +83,7 @@ class UserController extends Controller
     }
 
     /**
+     * Сохранение нового пользователя
      * @return Response
      */
     public function actionInsert()
@@ -92,7 +91,7 @@ class UserController extends Controller
         $params = Yii::$app->request->post();
         $user = User::fromArray($params);
         if ($user->save()) {
-            Yii::$app->session->setFlash('success', 'User created.');
+            Yii::$app->session->setFlash('success', 'Пользователь создан.');
             return $this->redirect(['user/index']);
         }
         Yii::$app->session->setFlash('errors', $user->getErrors());
@@ -100,19 +99,55 @@ class UserController extends Controller
     }
 
     /**
+     * Форма редактирования пользователя
+     * @param int $id
+     * @return array|string
+     * @throws HttpException
+     */
+    public function actionEdit(int $id)
+    {
+        $user = User::findById($id);
+
+        if (is_null($user)) {
+            throw new HttpException(404);
+        }       
+
+        if (!Yii::$app->user->can('admin')) {
+            if ($user['id'] !== Yii::$app->user->id) {
+                throw new ForbiddenHttpException();
+            }
+        }
+
+        return $this->inertia('Users/Edit', [
+            'user' => $user,
+            'organizations' => Organization::findActual()->asArray()->all(),
+            'labels' => User::attributeLabelsStatic(),
+        ]);
+    }
+
+    /**
+     * Сохранение редактируемого пользователя
      * @param int $id
      * @return Response
      * @throws HttpException
      */
-    public function actionUpdate($id)
+    public function actionUpdate(int $id)
     {
         $user = User::findOne($id);
+        
         if (is_null($user)) {
             throw new HttpException(404);
-        }        
+        }
+        
+        if (!Yii::$app->user->can('admin')) {
+            if ($user['id'] !== Yii::$app->user->id) {
+                throw new ForbiddenHttpException();
+            }
+        }
+
         $user->attributes = Yii::$app->request->post();        
         if ($user->save()) {
-            Yii::$app->session->setFlash('success', 'User updated.');
+            Yii::$app->session->setFlash('success', 'Пользователь обновлен.');
             return $this->redirect(['user/edit', 'id' => $id]);
         }
         Yii::$app->session->setFlash('errors', $user->getErrors());
@@ -120,11 +155,12 @@ class UserController extends Controller
     }
 
     /**
+     * Удаление пользователя
      * @param int $id
      * @return Response
      * @throws HttpException
      */
-    public function actionDelete($id)
+    public function actionDelete(int $id)
     {
         $user = User::findOne($id);
         if (is_null($user)) {
@@ -137,11 +173,12 @@ class UserController extends Controller
     }
 
     /**
+     * Восстановление пользователя (ранее удаленного)
      * @param $id
      * @return Response
      * @throws HttpException
      */
-    public function actionRestore($id)
+    public function actionRestore(int $id)
     {
         $user = User::findOne($id);
         if (is_null($user)) {
@@ -161,4 +198,5 @@ class UserController extends Controller
     {       
         return $users;
     }
+    
 }

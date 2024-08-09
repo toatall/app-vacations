@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\Chart;
 use tebe\inertia\web\Controller;
 use Yii;
+use yii\filters\AccessControl;
 use yii\web\Response;
 
 /**
@@ -13,6 +14,24 @@ use yii\web\Response;
 class ChartController extends Controller
 {
 
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => AccessControl::class,               
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ]
+                ],
+            ],            
+        ];
+    }
+    
     /**
      * Данные для графика отпусков 
      * Ежедневное количество отпускников по организации за год

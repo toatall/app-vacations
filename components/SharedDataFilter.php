@@ -56,7 +56,7 @@ class SharedDataFilter extends ActionFilter
             'username' => $user->username,
             'full_name' => $user->full_name,
             'email' => $user->email,
-            'roles' => Yii::$app->authManager->getRolesByUser(Yii::$app->user->id),
+            'roles' => array_values(array_map(fn($role) => $role->name, Yii::$app->authManager->getRolesByUser(Yii::$app->user->id))),
             'org_code_select' => $user->org_code_select,
             'available_organizations' => Organization::findActual()->select('code')->asArray()->all(),
         ];                    

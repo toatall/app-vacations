@@ -5,10 +5,29 @@ namespace app\controllers;
 use app\models\VacationStatistics;
 use tebe\inertia\web\Controller;
 use Yii;
+use yii\filters\AccessControl;
 use yii\web\Response;
 
 class StatisticsController extends Controller
 {    
+
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => AccessControl::class,               
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ]
+                ],
+            ],            
+        ];
+    }
 
     /**
      * @var VacationStatistics

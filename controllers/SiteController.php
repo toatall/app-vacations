@@ -4,11 +4,9 @@ namespace app\controllers;
 
 use app\components\SharedDataFilter;
 use app\models\LoginForm;
-use app\models\Vacation;
 use tebe\inertia\web\Controller;
 use Yii;
 use yii\filters\AccessControl;
-use yii\filters\VerbFilter;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\ServerErrorHttpException;
@@ -22,7 +20,7 @@ class SiteController extends Controller
     {
         return [
             [
-                'class' => AccessControl::className(),
+                'class' => AccessControl::class,
                 'only' => ['index', 'logout'],
                 'rules' => [
                     [
@@ -30,7 +28,7 @@ class SiteController extends Controller
                         'allow' => true,
                         'roles' => ['@']
                     ]
-                ]
+                ],
             ],
             [
                 'class' => SharedDataFilter::class
@@ -38,6 +36,9 @@ class SiteController extends Controller
         ];
     }
 
+    /**
+     * @return string
+     */
     public function actionError()
     {
         $this->layout = 'error';
@@ -53,8 +54,7 @@ class SiteController extends Controller
     }
 
     /**
-     * Displays homepage.
-     *
+     * Главная страница
      * @return string
      */
     public function actionIndex()
@@ -62,6 +62,10 @@ class SiteController extends Controller
         return $this->inertia('Dashboard/Index');
     }    
 
+    /**
+     * Смена организации
+     * @return void|boolean
+     */
     public function actionChangeOrganization()
     {        
         $code = Yii::$app->request->post('code');
@@ -77,8 +81,7 @@ class SiteController extends Controller
     }
 
     /**
-     * Login action.
-     *
+     * Вход
      * @return Response|string
      */
     public function actionLogin()
@@ -101,8 +104,7 @@ class SiteController extends Controller
     }
 
     /**
-     * Logout action.
-     *
+     * Выход
      * @return Response
      */
     public function actionLogout()
