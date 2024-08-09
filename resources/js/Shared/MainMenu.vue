@@ -3,6 +3,9 @@ import { Link, usePage } from '@inertiajs/vue3'
 import routes from '@/Config/routes';
 
 const page = usePage()
+const props = defineProps({
+  isAdmin: Boolean,
+})
 
 const isUrl = (url) => {
   let currentUrl = page.url;
@@ -37,7 +40,7 @@ const urlFind = routes.find()
       </Link>
     </div>   
 
-    <div class="mb-4">
+    <div v-if="isAdmin" class="mb-4">
       <Link class="group flex items-center py-3" :href="urlOrganizations" :class="isUrl(urlOrganizations) ? 'text-white' : 'text-indigo-300 group-hover:text-white'">
         <i class="pi pi-building-columns me-2"></i>
         <div>Организации</div>

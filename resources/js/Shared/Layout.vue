@@ -13,9 +13,10 @@ import routes from '@/Config/routes'
 import DynamicDialog from 'primevue/dynamicdialog'
 
 const props = defineProps({
-    auth: Object,
+  auth: Object,
 })
 
+const isAdmin = ref(props.auth.user.roles.indexOf('admin') >= 0);
 
 /** Menu organization start */
 
@@ -35,15 +36,15 @@ const menuItemsOrganizations = computed(() =>{
 
 const changeOrganization = (code) => {
     if (code !== props.auth.user.org_code_select) {       
-        axios.post(`/site/change-organization`, { code: code })
-          .then(() => router.visit(window.location.href))        
+      axios.post(`/site/change-organization`, { code: code })
+        .then(() => router.visit(window.location.href))        
     }
 }
 
 const itemsOrganizations = ref([
     {
-        label: 'Организации',
-        items: menuItemsOrganizations,        
+      label: 'Организации',
+      items: menuItemsOrganizations,        
     }
 ]);
 
@@ -68,6 +69,7 @@ const itemsProfile = [
     icon: 'pi pi-users',
     label: 'Управление пользователями',
     command: () => router.get(routes.manageUsers()),
+    visible: isAdmin.value,
   },
   {
     icon: 'pi pi-sign-out',
@@ -81,6 +83,8 @@ const toggleProfile = (event) => {
 }
 
 /** Menu profile end */
+
+
 
 </script>
 <template>
@@ -133,7 +137,7 @@ const toggleProfile = (event) => {
           </div>
         </div>
         <div class="md:flex md:grow md:overflow-hidden">
-          <main-menu class="hidden shrink-0 p-12 w-56 bg-indigo-800 overflow-y-auto md:block" />
+          <main-menu :isAdmin="isAdmin" class="hidden shrink-0 p-12 w-56 bg-indigo-800 overflow-y-auto md:block" />
           <div class="px-4 py-8 md:flex-1 md:p-12 md:overflow-y-auto" scroll-region>
             <flash-messages />            
             <slot />
