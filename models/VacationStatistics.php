@@ -50,8 +50,8 @@ class VacationStatistics
                     FROM {{employees}}
                         RIGHT JOIN {{departments}} ON {{departments}}.[[id]] = {{employees}}.[[id_department]]
                         LEFT JOIN {{vacations}} ON {{vacations}}.[[id_employee]] = {{employees}}.[[id]]
-                    WHERE {{departments}}.[[org_code]] = :org_code
-                        AND DATE_PART('YEAR', {{vacations}}.[[date_from]]) = :year
+                    WHERE {{departments}}.[[org_code]] = :org_code                       
+                        AND {{departments}}.[[year]] = :year
                     ) AS [[total]]                        
                 ,(
                     SELECT 
@@ -61,7 +61,7 @@ class VacationStatistics
                         LEFT JOIN {{vacations}} ON {{vacations}}.[[id_employee]] = {{employees}}.[[id]]
                     WHERE {{departments}}.[[org_code]] = :org_code 
                         AND NOW() BETWEEN {{vacations}}.[[date_from]] AND {{vacations}}.[[date_to]]
-                        AND DATE_PART('YEAR', {{vacations}}.[[date_from]]) = :year
+                        AND {{departments}}.[[year]] = :year
                 ) AS [[total_on_vacations]]
                 ,(
                     SELECT 
@@ -71,7 +71,7 @@ class VacationStatistics
                         LEFT JOIN {{vacations}} ON {{vacations}}.[[id_employee]] = {{employees}}.[[id]]			
                     WHERE {{departments}}.[[org_code]] = :org_code                        
                         AND {{vacations}}.[[date_from]] BETWEEN (NOW() + MAKE_INTERVAL(DAYS => :intervalDaysFrom))::DATE AND (NOW() + MAKE_INTERVAL(DAYS => :intervalDaysTo))::DATE
-                        AND DATE_PART('YEAR', {{vacations}}.[[date_from]]) = :year
+                        AND {{departments}}.[[year]] = :year
                 ) AS [[total_will_be_on_vacations]]
             ) AS {{t}}
         SQL, [
