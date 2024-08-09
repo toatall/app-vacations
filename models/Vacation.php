@@ -107,4 +107,45 @@ class Vacation
         return $result;
     }
 
+    /**
+     * Список сотрудников с объединенными отпусками
+     * @param string $codeOrganization
+     * @param string $year
+     * @return array
+     */
+    public static function mergedVacationsPerDayByDepartments(string $codeOrganization, string $year)
+    {
+        $result = \Yii::$app->getDb()->createCommand(<<<SQL
+            
+            SELECT 
+                {{departments}}.[[id]] AS "id_department"
+                ,{{departments}}.[[name]] AS "department"
+                ,{{departments}}.[[sort_index]] AS "sort_index_department"
+                ,{{employees}}.[[id]] AS "id_employee"
+                ,{{employees}}.[[full_name]]
+                ,{{employees}}.[[post]]
+                ,{{employees}}.[[sort_index]] AS "sort_index_employee"
+                ,{{vacations_merged}}.[[date_from]]
+                ,{{vacations_merged}}.[[date_to]]
+            FROM {{departments}}
+                LEFT JOIN {{employees}} ON {{employees}}.[[id_department]] = {{departments}}.[[id]]
+                LEFT JOIN {{vacations_merged}} ON {{vacations_merged}}.[[id_employee]] = {{employees}}.[[id]]                
+            WHERE {{departments}}.[[org_code]] = :org_code AND {{departments}}.[[year]] = :year
+                AND {{vacations_merged}}.[[year]] = {{departments}}.[[year]]
+            ORDER BY 
+                {{departments}}.[[sort_index]] ASC
+                ,{{departments}}.[[name]] ASC
+                ,{{employees}}.[[sort_index]] ASC
+                ,{{employees}}.[[full_name]] ASC
+                ,{{vacations_merged}}.[[date_from]] ASC
+
+        SQL, [
+            ':org_code' => $codeOrganization,
+            ':year' => $year,
+        ])->queryAll();
+
+        return $result;
+    }
+
+
 }
