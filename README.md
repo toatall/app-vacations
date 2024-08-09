@@ -1,28 +1,28 @@
-# Ping CRM on Yii 2
+# График отпусков
 
-A Yii 2 demo application to illustrate how [Inertia.js](https://inertiajs.com) works.
+Приложение для демонстрации информации об отпусках.
 
-With Inertia you are able to build single-page apps using classic server-side routing and controllers, without building an API.
+Возможно переключение организации в правом верхнем меню.
 
-This application is a port of the original [Ping CRM written in Laravel](https://github.com/inertiajs/pingcrm) and based on the [Yii 2 Basic Project Template](https://github.com/yiisoft/yii2-app-basic). 
+Главная страница представляет статистические данные об отпусках сотрудников. 
 
-![](screenshot.png)
+Страница "Табель" показывает отпуска сгруппированные по отделам и месяцам. Каждую группу возможно развернуть для просмотра более детальной информации.
 
-**Based on the application https://github.com/tbreuss/pingcrm-yii2**
+Страница "Поиск" помогает найти информацию по отпускам по сотруднику или по дате отпуска.
 
-Changes: Updated Vue to version 3, updated npm packages and composer. Converted Vue files to Composition API (script setup).
+![](screen_01.png)
+![](screen_02.png)
+![](screen_03.png)
 
-## Demo
+**В качестве базового приложения использован https://github.com/tbreuss/pingcrm-yii2**
 
-<https://pingcrm-yii2.tebe.ch>
-
-## Installation
+## Установка
 
 Clone the repo locally:
 
 ```sh
-git clone https://github.com/toatall/pingcrm-yii2-vue3 pingcrm-yii2-vue3
-cd pingcrm-yii2-vue3
+git clone https://github.com/toatall/app-vacations app-vacations
+cd app-vacations
 ```
 
 Install PHP dependencies:
@@ -44,11 +44,7 @@ npm run css-dev
 npm run dev
 ```
 
-Create an SQLite database. You can also use another database (MySQL, Postgres), simply update your configuration accordingly.
-
-```sh
-touch database/database.sqlite
-```
+Create Postgres database. 
 
 Run database migrations:
 
@@ -85,7 +81,7 @@ To run the Ping CRM tests, run:
 
 - PHP >=7.4.0
 - Node.js & NPM
-- SQLite
+- Postgres
 
 ## Extending this project
 
