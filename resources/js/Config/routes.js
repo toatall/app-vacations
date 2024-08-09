@@ -20,6 +20,9 @@ export default {
   // табель отпусков
   table: () => '/table',
 
+  // поиск
+  find: () => '/find',
+
 
 
   // статистика для главной страницы
@@ -45,6 +48,10 @@ export default {
   // данные об отпуске по каждому сотруднику
   tableData: function (org_code, year) {
     return `/table/table-data/${org_code}/${year}`;
+  },
+
+  vacationsFind: function (org_code, year) {
+    return `/find-data/${org_code}/${year}`;
   },
   
 

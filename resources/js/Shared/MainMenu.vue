@@ -12,6 +12,7 @@ const isUrl = (url) => {
 const urlHome = routes.home()
 const urlOrganizations = routes.organizations()
 const urlTable = routes.table()
+const urlFind = routes.find()
 
 
 </script>
@@ -28,7 +29,13 @@ const urlTable = routes.table()
         <i class="pi pi-table me-2"></i>
         <div>Табель</div>
       </Link>
-    </div>    
+    </div> 
+    <div class="mb-4">
+      <Link class="group flex items-center py-3" :href="urlFind" :class="isUrl(urlFind) ? 'text-white' : 'text-indigo-300 group-hover:text-white'">
+        <i class="pi pi-search me-2"></i>
+        <div>Поиск</div>
+      </Link>
+    </div>   
 
     <div class="mb-4">
       <Link class="group flex items-center py-3" :href="urlOrganizations" :class="isUrl(urlOrganizations) ? 'text-white' : 'text-indigo-300 group-hover:text-white'">
