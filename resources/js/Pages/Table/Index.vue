@@ -2,7 +2,7 @@
 import Layout from '@/Shared/Layout.vue'
 import { Head } from '@inertiajs/vue3'
 import Breadcrumbs from '@/Shared/Breadcrumbs.vue'
-import Years from '@/Pages/Dashboard/Years.vue'
+import Years from '@/Shared/Years.vue'
 import { ref } from 'vue'
 import Table from './Table.vue'
 
