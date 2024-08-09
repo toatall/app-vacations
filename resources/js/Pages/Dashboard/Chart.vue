@@ -18,10 +18,10 @@ const options = ref({
     defaultLocale: 'ru',    
   },  
   xaxis: {
-    type: 'datetime',
+    type: 'datetime',    
   },
   yaxis: {
-    type: 'date',
+    type: 'integer',
   },
   stroke: {
     curve: 'smooth',
@@ -29,6 +29,23 @@ const options = ref({
   dataLabels: {
     enabled: false,
 
+  },
+  annotations: {
+    xaxis: [
+      {
+        x: new Date().getTime(),
+        borderColor: '#00E396',
+        label: {
+          borderColor: '#00E396',
+          style: {
+            color: '#fff',
+            background: '#00E396',
+            fontWeight: 'bold',
+          },
+          text: "Сегодня"
+        }
+      }
+    ]
   },
 })
 
