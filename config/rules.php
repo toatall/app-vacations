@@ -54,9 +54,12 @@ return [
         'defaults' => ['int_days_from' => 1, 'int_days_to' => 7],
         'verb' => 'GET',
     ],
+    'GET find' => 'vacations/find',
+    'GET find-data/<code_org:\d+>/<year:\d{4}>' => 'vacations/find-data',
 
     // Table
     'GET table/index' => 'table/index',
     'GET table/table-data/<code_org:\d+>/<year:\d{4}>' => 'table/table-data',
+    
 
 ];
