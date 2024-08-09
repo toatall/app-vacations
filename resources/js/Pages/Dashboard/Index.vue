@@ -3,7 +3,7 @@ import { Head, Link } from '@inertiajs/vue3'
 import Layout from '@/Shared/Layout.vue'
 import CardsNumber from './CardsNumber.vue'
 import Chart from './Chart.vue'
-import Years from './Years.vue'
+import Years from '../../Shared/Years.vue'
 import { ref } from 'vue'
 import Message from 'primevue/message';
 
