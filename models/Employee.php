@@ -9,7 +9,6 @@ use Yii;
  *
  * @property int $id
  * @property int $id_department
- * @property string $org_code
  * @property string $full_name
  * @property string|null $created_at
  *
@@ -31,13 +30,12 @@ class Employee extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_department', 'org_code', 'full_name'], 'required'],
+            [['id_department', 'full_name'], 'required'],
             [['id_department'], 'default', 'value' => null],
             [['id_department'], 'integer'],
             [['created_at'], 'safe'],
-            [['org_code'], 'string', 'max' => 5],
             [['full_name'], 'string', 'max' => 250],
-            [['id_department', 'org_code', 'full_name'], 'unique', 'targetAttribute' => ['id_department', 'org_code', 'full_name']],
+            [['id_department', 'full_name'], 'unique', 'targetAttribute' => ['id_department', 'full_name']],
         ];
     }
 
@@ -48,7 +46,6 @@ class Employee extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ИД',
-            'org_code' => 'Организация',
             'id_department' => 'Отдел',
             'full_name' => 'ФИО',
             'created_at' => 'Дата создания',
