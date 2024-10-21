@@ -117,11 +117,15 @@ class UserController extends Controller
                 throw new ForbiddenHttpException();
             }
         }
-
+        
         return $this->inertia('Users/Edit', [
             'user' => $user,
             'organizations' => Organization::findActual()->asArray()->all(),
             'labels' => User::attributeLabelsStatic(),
+            'roles' => [
+                'all' => Yii::$app->roles->allList(),
+                'currentUser' => Yii::$app->roles->userList($id),
+            ],
         ]);
     }
 
@@ -143,6 +147,11 @@ class UserController extends Controller
             if ($user['id'] !== Yii::$app->user->id) {
                 throw new ForbiddenHttpException();
             }
+        }
+        else {
+            // сохранение ролей
+            $roles = (array)Yii::$app->request->post('roles');
+            Yii::$app->roles->update($id, $roles);
         }
 
         $user->attributes = Yii::$app->request->post();        
@@ -196,7 +205,19 @@ class UserController extends Controller
      */
     private function mapUsers(array $users)
     {       
-        return $users;
+        return array_map(function($user) {
+            return [
+                'id' => $user['id'],
+                'username' => $user['username'],
+                'full_name' => $user['full_name'],
+                'email' => $user['email'],
+                'org_code' => $user['org_code'],
+                'post' => $user['post'],
+                'roles' => Yii::$app->roles->userListDescription($user['id']),
+                'created_at' => $user['created_at'],
+                'updated_at' => $user['updated_at'],
+            ];
+        }, $users);
     }
     
 }

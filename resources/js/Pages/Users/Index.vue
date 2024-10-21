@@ -125,7 +125,16 @@ const title = 'Пользователи'
       </Column>
       <Column field="full_name" :header="labels.full_name" sortable></Column>
       <Column field="email" :header="labels.email" sortable></Column>  
-      <Column field="org_code" :header="labels.org_code" sortable></Column>    
+      <Column field="org_code" :header="labels.org_code" sortable></Column>
+      <Column :header="labels.roles">
+        <template #body="{ data }">
+          <ul>
+            <li v-for="role in data.roles">
+              {{ role }}
+            </li>
+          </ul>
+        </template>
+      </Column>
     </DataTable>
 
   </div>

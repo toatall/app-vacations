@@ -1,10 +1,10 @@
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3'
+import { Head, useForm } from '@inertiajs/vue3'
 import Layout from '@/Shared/Layout.vue'
 import { useConfirm } from "primevue/useconfirm"
 import Breadcrumbs from '@/Shared/Breadcrumbs.vue'
 import Form from './Form.vue'
-import { computed, reactive, ref } from 'vue'
+import { computed } from 'vue'
 
 defineOptions({
   layout: Layout,  
@@ -16,7 +16,9 @@ const props = defineProps({
   user: Object,
   organizations: Array,
   labels: Object,
+  roles: Object,
 })
+
 const form = useForm({
   username: props.user.username,
   full_name: props.user.full_name,
@@ -24,6 +26,7 @@ const form = useForm({
   newPassword: '',
   org_code: props.user.org_code,
   userPost: props.user.userPost,
+  roles: props.roles.currentUser,
 })
 
 const update = () => {
@@ -55,7 +58,7 @@ const restore = () => {
 }
 
 const title = computed(() => {
-  return `${form.full_name} (${form.username})`
+  return `${form.full_name ?? ''} (${form.username})`
 })
 
 </script>
@@ -69,8 +72,19 @@ const title = computed(() => {
       { label: title },
     ]" />    
 
-    <Form :labels="labels" :user="user" :auth="auth" :organizations="organizations" :form="form" :isNew="false" @save="update" @restore="restore" @destroy="destroy" />
-    
+    <Form 
+      :labels="labels" 
+      :user="user" 
+      :auth="auth" 
+      :roles="roles"
+      :organizations="organizations" 
+      :form="form" 
+      :isNew="false" 
+      @save="update" 
+      @restore="restore" 
+      @destroy="destroy" 
+    />
+
     <!-- <trashed-message v-if="user.deleted_at" class="mb-6" @restore="restore"> This user has been deleted. </trashed-message>
     <div class="max-w-3xl bg-white rounded-md shadow overflow-hidden">
       <form @submit.prevent="update">

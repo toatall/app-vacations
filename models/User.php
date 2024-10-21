@@ -53,7 +53,8 @@ class User extends ActiveRecord implements IdentityInterface
             [['org_code', 'org_code_select'], 'string', 'max' => 5],
             [['password'], 'string', 'max' => 255],            
             [['username', 'email'], 'unique'],
-            [['newPassword'], 'string', 'max' => 255],            
+            [['newPassword'], 'string', 'max' => 255],
+            [['post'], 'string', 'max' => 250],         
         ];
     }
 
@@ -80,6 +81,7 @@ class User extends ActiveRecord implements IdentityInterface
             'password' => 'Пароль',
             'newPassword' => 'Пароль',
             'post' => 'Должность',
+            'roles' => 'Роли',
             'created_at' => 'Дата создания',
             'updated_at' => 'Дата изменения',
             'deleted_at' => 'Дата удаления',
@@ -90,11 +92,11 @@ class User extends ActiveRecord implements IdentityInterface
      * @return array
      */
     public function behaviors()
-    {
+    {                
         return [
             [
                 'class' => TimestampBehavior::class,
-                'value' => date('Y-m-d H:i:s')
+                'value' => date('Y-m-d H:i:s')                
             ],            
         ];
     }    
@@ -106,7 +108,7 @@ class User extends ActiveRecord implements IdentityInterface
     {        
         if (!empty($this->newPassword)) {
             $this->password = Yii::$app->security->generatePasswordHash($this->newPassword);
-        }        
+        }                
         return parent::beforeSave($insert);
     }
 
