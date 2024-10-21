@@ -17,7 +17,7 @@ class m200208_000000_create_users_table extends Migration
             'username' => $this->string(50)->notNull()->unique(),
             'password' => $this->string()->null(),            
             'full_name' => $this->string(250),
-            'post' => $this->string(250),
+            'position' => $this->string(250),
             'email' => $this->string(50)->unique(),
             'org_code' => $this->string(5),
             'org_code_select' => $this->string(5),

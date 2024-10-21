@@ -212,7 +212,7 @@ class UserController extends Controller
                 'full_name' => $user['full_name'],
                 'email' => $user['email'],
                 'org_code' => $user['org_code'],
-                'post' => $user['post'],
+                'position' => $user['position'],
                 'roles' => Yii::$app->roles->userListDescription($user['id']),
                 'created_at' => $user['created_at'],
                 'updated_at' => $user['updated_at'],

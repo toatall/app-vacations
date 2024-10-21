@@ -66,8 +66,8 @@ const isAdmin = props.auth.user.roles.indexOf('admin') >= 0
             </div>
             <div class="mb-4 flex flex-col gap-6 xl:flex-row">
               <div class="w-full xl:w-1/2">
-                <text-input v-model="form.userPost" :error="form.errors.post" class="pb-8 w-full"
-                  :label="labels.post" />
+                <text-input v-model="form.position" :error="form.errors.position" class="pb-8 w-full"
+                  :label="labels.position" />
               </div>
               <div class="w-full xl:w-1/2">                
                   <DropdownInput 

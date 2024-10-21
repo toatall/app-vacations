@@ -20,8 +20,7 @@ use yii\web\IdentityInterface;
  * @property string|null $full_name
  * @property string|null $email
  * @property string|null $password
- * @property string|null $post
- * @property string|null $userPost
+ * @property string|null $position
  * @property string|null $created_at
  * @property string|null $updated_at
  * @property string|null $deleted_at
@@ -54,7 +53,7 @@ class User extends ActiveRecord implements IdentityInterface
             [['password'], 'string', 'max' => 255],            
             [['username', 'email'], 'unique'],
             [['newPassword'], 'string', 'max' => 255],
-            [['post'], 'string', 'max' => 250],         
+            [['position'], 'string', 'max' => 250],         
         ];
     }
 
@@ -80,7 +79,7 @@ class User extends ActiveRecord implements IdentityInterface
             'email' => 'Email',
             'password' => 'Пароль',
             'newPassword' => 'Пароль',
-            'post' => 'Должность',
+            'position' => 'Должность',
             'roles' => 'Роли',
             'created_at' => 'Дата создания',
             'updated_at' => 'Дата изменения',
@@ -110,17 +109,7 @@ class User extends ActiveRecord implements IdentityInterface
             $this->password = Yii::$app->security->generatePasswordHash($this->newPassword);
         }                
         return parent::beforeSave($insert);
-    }
-
-    public function getUserPost()
-    {
-        return $this->post;
-    }
-
-    public function setUserPost($value)
-    {
-        $this->post = $value;
-    }
+    }    
 
     /**
      * Validates password
