@@ -1,10 +1,6 @@
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3'
+import { Head, useForm } from '@inertiajs/vue3'
 import Layout from '@/Shared/Layout.vue'
-import FileInput from '@/Shared/FileInput.vue'
-import TextInput from '@/Shared/TextInput.vue'
-import SelectInput from '@/Shared/SelectInput.vue'
-import LoadingButton from '@/Shared/LoadingButton.vue'
 import Breadcrumbs from '@/Shared/Breadcrumbs.vue'
 import Form from './Form.vue'
 
