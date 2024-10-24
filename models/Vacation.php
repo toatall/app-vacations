@@ -21,9 +21,10 @@ class Vacation
                 ,{{vacations_merged}}.[[date_to]]                
             FROM {{employees}}
                 RIGHT JOIN {{departments}} ON {{departments}}.[[id]] = {{employees}}.[[id_department]]
-                LEFT JOIN {{vacations_merged}} ON {{vacations_merged}}.[[id_employee]] = {{employees}}.[[id]]                
+                LEFT JOIN {{vacations_merged}} ON {{vacations_merged}}.[[id_employee]] = {{employees}}.[[id]]
+                    AND {{vacations_merged}}.[[year]] = {{departments}}.[[year]]
             WHERE {{departments}}.[[org_code]] = :org_code 
-                AND NOW() BETWEEN {{vacations_merged}}.[[date_from]] AND {{vacations_merged}}.[[date_to]]
+                AND CURRENT_DATE >= {{vacations_merged}}.[[date_from]] AND CURRENT_DATE <= {{vacations_merged}}.[[date_to]]
                 AND  {{vacations_merged}}.[[year]] = :year
         SQL, [
             ':org_code' => $codeOrganization,
@@ -52,8 +53,9 @@ class Vacation
             FROM {{employees}}
                 RIGHT JOIN {{departments}} ON {{departments}}.[[id]] = {{employees}}.[[id_department]]
                 LEFT JOIN {{vacations_merged}} ON {{vacations_merged}}.[[id_employee]] = {{employees}}.[[id]]                
-            WHERE {{departments}}.[[org_code]] = :org_code 
-            AND {{vacations_merged}}.[[date_from]] BETWEEN (NOW() + MAKE_INTERVAL(DAYS => :intervalDaysFrom))::DATE AND (NOW() + MAKE_INTERVAL(DAYS => :intervalDaysTo))::DATE
+            WHERE {{departments}}.[[org_code]] = :org_code             
+            AND {{vacations_merged}}.[[date_from]] >= (NOW() + MAKE_INTERVAL(DAYS => :intervalDaysFrom))::DATE 
+                AND {{vacations_merged}}.[[date_from]] <= (NOW() + MAKE_INTERVAL(DAYS => :intervalDaysTo))::DATE
                 AND  {{vacations_merged}}.[[year]] = :year
         SQL, [
             ':org_code' => $codeOrganization,
