@@ -62,6 +62,7 @@ $config = [
             'name' => '_Session',
             'savePath' => '@app/runtime/sessions'
         ],
+        'roles' => 'app\components\Roles',
     ],
     'params' => $params,
 ];
