@@ -48,6 +48,7 @@ class RolesController extends Controller
     {
         $auth = Yii::$app->authManager;
         $admin = $auth->createRole('admin');
+        $admin->description = 'Администратор';
         $auth->add($admin);        
     }
 
