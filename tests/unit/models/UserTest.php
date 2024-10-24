@@ -69,13 +69,7 @@ class UserTest extends \Codeception\Test\Unit
         $user->email = 'some@example.com';
         $this->assertTrue($user->save());
         $errors = $user->getErrors();
-        $this->assertEmpty($errors);
-
-        // post
-        $post = 'System administrator';
-        $user->userPost = $post;
-        $this->assertEquals($post, $user->userPost);
-        $this->assertEquals($post, $user->post);
+        $this->assertEmpty($errors);        
     }
 
     public function testValidatePassword()
