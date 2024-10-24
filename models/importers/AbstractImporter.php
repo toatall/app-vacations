@@ -224,7 +224,8 @@ abstract class AbstractImporter
                     SELECT {{vacations_merged}}.[[id]] FROM {{vacations_merged}}
                         RIGHT JOIN {{employees}} ON {{employees}}.[[id]] = {{vacations_merged}}.[[id_employee]]  
                         RIGHT JOIN {{departments}} ON {{departments}}.[[id]] = {{employees}}.[[id_department]]
-                    WHERE {{departments}}.[[org_code]] = :org_code AND {{vacations_merged}}.[[year]] = :year 
+                            AND {{vacations_merged}}.[[year]] = :year
+                    WHERE {{departments}}.[[org_code]] = :org_code AND {{departments}}.[[year]] = :year 
                         AND {{vacations_merged}}.[[update_hash]] <> :update_hash                
                 )
             SQL, [                
@@ -449,12 +450,6 @@ abstract class AbstractImporter
                 'error_trace' => $this->errorTrace,
             ])
             ->execute();
-    }
-
-    protected function clearData(string $codeOrganization, string $year)
-    {
-        $command = $this->getDb()->createCommand();
-        //$command->delete('')
     }
 
 
