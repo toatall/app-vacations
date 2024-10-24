@@ -1,6 +1,6 @@
 # График отпусков
 
-[![Build & Deploy](https://github.com/toatall/app-vacations/actions/workflows/deploy.yml/badge.svg)](https://github.com/toatall/app-vacations/actions/workflows/deploy.yml)
+[![Build & Deploy](https://github.com/toatall/app-vacations/actions/workflows/deploy.yml/badge.svg?event=push)](https://github.com/toatall/app-vacations/actions/workflows/deploy.yml)
 
 
 Приложение для демонстрации информации об отпусках.
