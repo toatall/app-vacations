@@ -18,7 +18,7 @@
         "yiisoft/yii2": "~2.0.45",
         "yiisoft/yii2-symfonymailer": "~2.0.3",        
         "tebe/yii2-inertia": "dev-master",
-        "symfony/ldap": "^7.1"
+        "symfony/ldap": "^5.4"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",
