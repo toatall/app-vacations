@@ -170,16 +170,45 @@ abstract class AbstractImporter
             ])->execute();
 
 
-            // удаление неактуальных данных из таблиц departments, employees, vacations
+            // удаление неактуальных данных из таблиц departments
             $db->createCommand(<<<SQL
                 DELETE FROM {{departments}}
                 WHERE [[id]] IN (
                     SELECT {{departments}}.[[id]] FROM {{departments}}
-                        LEFT JOIN {{employees}} ON {{employees}}.[[id_department]] = {{departments}}.[[id]]                                    
-                        LEFT JOIN {{vacations}} ON {{vacations}}.[[id_employee]] = {{employees}}.[[id]]
+                        LEFT JOIN {{employees}} ON {{employees}}.[[id_department]] = {{departments}}.[[id]]                                                            
                     WHERE {{employees}}.[[update_hash]]<>:update_hash AND {{departments}}.[[org_code]]=:org_code
                         AND {{departments}}.[[year]] = :year
-                        --AND DATE_PART('YEAR', {{vacations}}.[[date_from]]) = :year 
+                )
+            SQL, [
+                ':update_hash' => $this->updateHash,
+                ':org_code' => $this->codeOrganization,
+                ':year' => $this->year,
+            ])->execute();
+
+            // удаление неактуальных данных из таблиц employees
+            $db->createCommand(<<<SQL
+                DELETE FROM {{employees}}
+                WHERE [[id]] IN (
+                    SELECT {{employees}}.[[id]] FROM {{employees}}
+                        RIGHT JOIN {{departments}} ON {{departments}}.[[id]] = {{employees}}.[[id_department]]                       
+                    WHERE {{employees}}.[[update_hash]]<>:update_hash AND {{departments}}.[[org_code]]=:org_code
+                        AND {{departments}}.[[year]] = :year
+                )
+            SQL, [
+                ':update_hash' => $this->updateHash,
+                ':org_code' => $this->codeOrganization,
+                ':year' => $this->year,
+            ])->execute();
+
+            // удаление неактуальных данных из таблиц vacations
+            $db->createCommand(<<<SQL
+                DELETE FROM {{vacations}}
+                WHERE [[id]] IN (
+                    SELECT {{vacations}}.[[id]] FROM {{vacations}}
+                        RIGHT JOIN {{employees}} ON {{employees}}.[[id]] = {{vacations}}.[[id_employee]]
+                        RIGHT JOIN {{departments}} ON {{departments}}.[[id]] = {{employees}}.[[id_department]]                       
+                    WHERE {{vacations}}.[[update_hash]]<>:update_hash AND {{departments}}.[[org_code]]=:org_code
+                        AND {{departments}}.[[year]] = :year
                 )
             SQL, [
                 ':update_hash' => $this->updateHash,
@@ -420,6 +449,12 @@ abstract class AbstractImporter
                 'error_trace' => $this->errorTrace,
             ])
             ->execute();
+    }
+
+    protected function clearData(string $codeOrganization, string $year)
+    {
+        $command = $this->getDb()->createCommand();
+        //$command->delete('')
     }
 
 
