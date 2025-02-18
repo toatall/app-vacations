@@ -56,7 +56,7 @@ abstract class AbstractImporter
      * Внедрение класса обработки коллекции
      * @param AbstractVacationCollection $collection
      */
-    public function __construct(AbstractVacationCollection $collection, string $code, string $year)
+    public function __construct(AbstractVacationCollection $collection, string $code, string|null $year)
     {
         $this->collection = $collection;
         $this->codeOrganization = $code;
@@ -89,7 +89,7 @@ abstract class AbstractImporter
             return $this->loadData();
         }
         catch (\Exception $ex) {
-            throw new LoadDataException($ex->getMessage(), $ex->getCode(), $ex);
+            throw new LoadDataException($ex->getMessage(), 0, $ex);
         }
     }
 
@@ -173,12 +173,8 @@ abstract class AbstractImporter
             // удаление неактуальных данных из таблиц departments
             $db->createCommand(<<<SQL
                 DELETE FROM {{departments}}
-                WHERE [[id]] IN (
-                    SELECT {{departments}}.[[id]] FROM {{departments}}
-                        LEFT JOIN {{employees}} ON {{employees}}.[[id_department]] = {{departments}}.[[id]]                                                            
-                    WHERE {{employees}}.[[update_hash]]<>:update_hash AND {{departments}}.[[org_code]]=:org_code
-                        AND {{departments}}.[[year]] = :year
-                )
+                WHERE {{departments}}.[[year]] = :year AND {{departments}}.[[org_code]]=:org_code
+                    AND {{departments}}.[[update_hash]]<>:update_hash                
             SQL, [
                 ':update_hash' => $this->updateHash,
                 ':org_code' => $this->codeOrganization,
@@ -256,6 +252,7 @@ abstract class AbstractImporter
                     'org_code' => $this->codeOrganization,
                     'year' => $this->year,
                     'name' => $item->department,
+                    'sort_index' => $item->departmentSortIndex,
                     'update_hash' => $this->updateHash, 
                 ], [
                     'update_hash' => $this->updateHash,
@@ -266,6 +263,7 @@ abstract class AbstractImporter
                     'SELECT "id" FROM "departments" WHERE "org_code"=:org_code AND "name"=:name AND "year"=:year', 
                     ['org_code' => $this->codeOrganization, ':name' => $item->department, ':year' => $this->year]
                 )->queryOne()['id'] ?? null;
+                
                 if ($departmentId === null) {
                     throw new \Exception('Не удалось получить id из таблицы departments');
                 }
@@ -285,14 +283,14 @@ abstract class AbstractImporter
                 ->queryOne()['id'] ?? null;
                 if ($vacationsKindId === null) {
                     throw new \Exception('Не удалось получить id из таблицы vacations_kind');
-                }            
-                
+                }
 
                 // добавление записи о сотруднике (employee)           
                 $this->upsert('employees', [
                     'id_department' => $departmentId,                    
                     'full_name' => $item->fullName,   
                     'post' => $item->post,
+                    'sort_index' => $item->employeeSortIndex,
                     'update_hash' => $this->updateHash,
                 ], [
                     'update_hash' => $this->updateHash,
@@ -305,8 +303,7 @@ abstract class AbstractImporter
                 ->queryOne()['id'] ?? null;
                 if ($employeeId === null) {
                     throw new \Exception('Не удалось получить id из таблицы employees');
-                }    
-                
+                }
 
                 // добавление записи об отпуске (vacations)           
                 $this->upsert('vacations', [
@@ -324,20 +321,17 @@ abstract class AbstractImporter
                     SELECT "id" FROM {{vacations}} 
                     WHERE [[id_kind]]=:id_kind AND [[id_employee]]=:id_employee 
                         AND [[date_from]]=TO_DATE(:date_from, 'YYYY-MM-DD') AND [[date_to]]=TO_DATE(:date_to, 'YYYY-MM-DD')
-                        AND [[status]]=:status
                     SQL, 
                     [
                         ':id_kind' => $vacationsKindId, 
                         ':id_employee' => $employeeId,
                         ':date_from' => $item->dateStartUTC,
                         ':date_to' => $item->dateEndUTC,
-                        ':status' => $item->status,
                     ])
                 ->queryOne()['id'] ?? null;
-                if (!$vacationId) {
+                if (!$vacationId) {                    
                     throw new \Exception('Не удалось вставить запись в таблицу vacations');
-                }
-                
+                }                
             }
         }
         catch (\Exception $ex) {
@@ -377,11 +371,13 @@ abstract class AbstractImporter
     {
         $db = $this->getDb();
         $indexColumns = $this->getIndexesByTable($table);
-        $where = array_intersect_key($insert, array_flip($indexColumns));       
+        $where = array_intersect_key($insert, array_flip($indexColumns));
+        
         $query = (new Query())
             ->from($table)
             ->where($where)
             ->exists($db);
+        
         if (!$query) {
             $db->createCommand()
                 ->insert($table, $insert)
@@ -420,7 +416,7 @@ abstract class AbstractImporter
             ORDER BY
                 "t"."relname",
                 "i"."relname";
-        SQL, [':table' => "$table%"])->queryAll();        
+        SQL, [':table' => "$table"])->queryAll();        
         return array_map(fn($item) => $item['column_name'], $items);
     }
 
