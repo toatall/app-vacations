@@ -95,7 +95,7 @@ class User extends ActiveRecord implements IdentityInterface
         return [
             [
                 'class' => TimestampBehavior::class,
-                'value' => date('Y-m-d H:i:s')                
+                'value' => Yii::$app->formatter->asDatetime('Now', 'php:Y-m-d H:i:s'),
             ],            
         ];
     }    
