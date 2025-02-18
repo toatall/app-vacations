@@ -62,7 +62,19 @@ $config = [
             'name' => '_Session',
             'savePath' => '@app/runtime/sessions'
         ],
+        
         'roles' => 'app\components\Roles',
+        
+        'formatter' => [
+            'class' => 'yii\i18n\Formatter',
+            'locale' => 'ru-RU',
+            'timeZone' => 'Asia/Yekaterinburg',
+            'defaultTimeZone' => 'Asia/Yekaterinburg',
+            'dateFormat' => 'php:d.m.Y',
+            'datetimeFormat' => 'php:d.m.Y H:i:s',
+            'timeFormat' => 'php:H:i:s',
+            'thousandSeparator' => ' ',
+        ],
     ],
     'params' => $params,
 ];
