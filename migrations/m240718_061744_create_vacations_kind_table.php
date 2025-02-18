@@ -15,7 +15,7 @@ class m240718_061744_create_vacations_kind_table extends Migration
         $this->createTable('vacations_kind', [
             'id' => $this->primaryKey(),
             'org_code' => $this->string(5)->notNull(),
-            'name' => $this->string(150)->notNull(),            
+            'name' => $this->string(500)->notNull(),            
             'created_at' => $this->dateTime()->notNull()->defaultExpression('NOW()'),
             'updated_at' => $this->dateTime()->notNull()->defaultExpression('NOW()'),            
         ]);
