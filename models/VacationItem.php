@@ -53,6 +53,18 @@ class VacationItem extends BaseObject
     public $kindVacation;
 
     /**
+     * Сортировка сотрудника
+     * @var string
+     */
+    public $employeeSortIndex;
+
+    /**
+     * Сортировка отдела
+     * @var string
+     */
+    public $departmentSortIndex;
+
+    /**
      * Статус
      * @var string
      */
