@@ -230,6 +230,8 @@ const toggleMenuTable = (event) => {
                   >
                     <i class="pi pi-user"></i>
                     {{ employee.name }}
+                    <br />
+                    <span class="text-gray-500">{{ employee.post }}</span>
                   </td>
                   <template v-for="i in calendar">
                     <td v-if="i.hideDetail" class="border-0 border-b border-r border-gray-200 text-center hover:bg-sky-50">
