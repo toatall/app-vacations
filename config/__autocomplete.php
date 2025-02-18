@@ -22,7 +22,7 @@ class Yii {
  * @property yii\rbac\DbManager $authManager 
  * @property \yii\web\User|__WebUser|\app\models\User $user
  * @property \app\components\Roles $roles
- * 
+ * @property \app\components\LdapAuthenticate $ldapAuthenticate
  */
 class __Application {
 }

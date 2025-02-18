@@ -138,11 +138,18 @@ class UserController extends Controller
     public function actionUpdate(int $id)
     {
         $user = User::findOne($id);
+        $useWindowsAuthenticate = Yii::$app->params['useWindowsAuthenticate'];
+        
+        // если включена windows-аутентификация, то пользователь без прав
+        // администратор ничего не может поменять
+        if ($useWindowsAuthenticate && !Yii::$app->user->can('admin')) {
+            throw new ForbiddenHttpException();
+        }
         
         if (is_null($user)) {
             throw new HttpException(404);
         }
-        
+                
         if (!Yii::$app->user->can('admin')) {
             if ($user['id'] !== Yii::$app->user->id) {
                 throw new ForbiddenHttpException();
@@ -154,8 +161,14 @@ class UserController extends Controller
             Yii::$app->roles->update($id, $roles);
         }
 
-        $user->attributes = Yii::$app->request->post();        
-        if ($user->save()) {
+        $user->attributes = Yii::$app->request->post();
+        
+        $saveAttributes = null;
+        // если включена windows-аутентификация, то можно изменить организацию
+        if ($useWindowsAuthenticate) {
+            $saveAttributes = ['org_code'];
+        }
+        if ($user->save(attributeNames: $saveAttributes)) {
             Yii::$app->session->setFlash('success', 'Пользователь обновлен.');
             return $this->redirect(['user/edit', 'id' => $id]);
         }

@@ -2,8 +2,11 @@
 
 namespace app\controllers;
 
+use app\components\LdapAuthenticate;
+use app\components\LdapFinder;
 use app\components\SharedDataFilter;
 use app\models\LoginForm;
+use app\models\UserFactory;
 use tebe\inertia\web\Controller;
 use Yii;
 use yii\filters\AccessControl;
@@ -90,6 +93,21 @@ class SiteController extends Controller
             return $this->goHome();
         }
 
+        // Аутентификация без ввода логина и пароля (на сервере должна быть включена windows-аутентификация)
+        if (Yii::$app->params['useWindowsAuthenticate'] && isset($_SERVER['AUTH_USER'])) {
+            $username = $this->removeDomainInUsername($_SERVER['AUTH_USER']);
+            $ldapAuthenticate = new LdapAuthenticate(new LdapFinder(Yii::$app->params['ldapConfig']), new UserFactory());
+            if ($ldapAuthenticate->login($username)) {
+                return $this->goBack();
+            }
+            else {
+                // return not found page
+                return $this->inertia('Auth/NotFound', [
+                    'username' => $username,
+                ]);
+            }
+        }
+
         $postData = Yii::$app->request->post();
         $model = new LoginForm();
         if ($model->load($postData, '')) {
@@ -101,6 +119,17 @@ class SiteController extends Controller
         }
 
         return $this->inertia('Auth/Login');        
+    }
+
+    /**
+     * Удаление домена из имени пользователя
+     * @param string $fullName
+     * @return string
+     */
+    protected function removeDomainInUsername($fullName)
+    {        
+        $parts = preg_split("/\\\/", $fullName);
+        return $parts[1] ?? $parts[0];
     }
 
     /**

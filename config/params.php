@@ -7,5 +7,6 @@ return [
 
     // используется windows-аутентификация
     // должна быть выполнена настройка на веб-сервере
-    'useWindowsAuthenticate' => false,
+    'useWindowsAuthenticate' => true,
+    'ldapConfig' => require __DIR__ . '/ldap.php',
 ];

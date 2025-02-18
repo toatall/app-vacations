@@ -46,27 +46,29 @@ const isAdmin = props.auth.user.roles.indexOf('admin') >= 0
           <div class="p-6">
             <div class="mb-4 flex flex-col gap-6 xl:flex-row">
               <div class="w-full xl:w-1/2">
-                <text-input v-model="form.username" :error="form.errors.username" class="pb-8 w-full"
+                <text-input v-model="form.username" :disabled="auth.useWindowsAuthenticate" :error="form.errors.username" class="pb-8 w-full"
                   :label="labels.username" />
               </div>
               <div class="w-full xl:w-1/2">
-                <text-input v-model="form.full_name" :error="form.errors.full_name" class="pb-8 w-full"
+                <text-input v-model="form.full_name" :disabled="auth.useWindowsAuthenticate" :error="form.errors.full_name" class="pb-8 w-full"
                   :label="labels.full_name" />
               </div>
             </div>
             <div class="mb-4 flex flex-col gap-6 xl:flex-row">
               <div class="w-full xl:w-1/2">
-                <text-input v-model="form.email" :error="form.errors.email" type="email" class="pb-8 w-full"
+                <text-input v-model="form.email" :disabled="auth.useWindowsAuthenticate" :error="form.errors.email" type="email" class="pb-8 w-full"
                   :label="labels.email" />
               </div>
               <div class="w-full xl:w-1/2">
-                <text-input v-model="form.newPassword" :error="form.errors.newPassword" type="password" class="pb-8 w-full"
-                  :label="labels.password" />
+                <template v-if="!auth.useWindowsAuthenticate">
+                  <text-input v-model="form.newPassword" :error="form.errors.newPassword" type="password" class="pb-8 w-full"
+                    :label="labels.password" />
+                </template>
               </div>
             </div>
             <div class="mb-4 flex flex-col gap-6 xl:flex-row">
               <div class="w-full xl:w-1/2">
-                <text-input v-model="form.position" :error="form.errors.position" class="pb-8 w-full"
+                <text-input v-model="form.position" :disabled="auth.useWindowsAuthenticate" :error="form.errors.position" class="pb-8 w-full"
                   :label="labels.position" />
               </div>
               <div class="w-full xl:w-1/2">                
@@ -75,7 +77,8 @@ const isAdmin = props.auth.user.roles.indexOf('admin') >= 0
                     :label="labels.org_code" 
                     :options="organizations" 
                     optionLabel="name" 
-                    optionValue="code" 
+                    optionValue="code"  
+                    :disabled="auth.useWindowsAuthenticate && !isAdmin"
                     class="w-full" />
               </div>
             </div>            
@@ -110,7 +113,7 @@ const isAdmin = props.auth.user.roles.indexOf('admin') >= 0
             </div>
           </template>
 
-          <div class="flex items-center justify-between px-8 py-4 bg-gray-50 border-t border-gray-100">
+          <div v-if="isAdmin" class="flex items-center justify-between px-8 py-4 bg-gray-50 border-t border-gray-100">
             <Button v-if="!isNew && user && !user.deleted_at" @click="$emit('destroy')"
               severity="danger" label="Удалить" />
             <span v-else></span>
