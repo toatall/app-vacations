@@ -33,15 +33,15 @@ class MssqlVacationCollection extends AbstractVacationCollection
     protected function prepare($row): VacationItem
     {        
         return new VacationItem([
-            'dateStart' => trim($row['DATE_BEGIN']),
-            'dateEnd' => trim($row['DATE_END']),
-            'fullName' => trim($row['FIO']),
+            'dateStart' => $row['DATE_BEGIN'],
+            'dateEnd' => $row['DATE_END'],
+            'fullName' => trim($row['FIO'] ?? ''),
             'organization' => $this->codeOrganization,
-            'department' => trim($row['DEPARTMENT_NAME']),
-            'departmentSortIndex' => trim($row['DEPARTMENT_CODE']),
-            'post' => trim($row['POST_NAME']),
-            'employeeSortIndex' => trim($row['POST_CODE']),
-            'kindVacation' => $this->extractKindVacation(trim($row['KIND_VACATION'])),
+            'department' => trim($row['DEPARTMENT_NAME'] ?? ''),
+            'departmentSortIndex' => trim($row['DEPARTMENT_CODE'] ?? ''),
+            'post' => trim($row['POST_NAME'] ?? ''),
+            'employeeSortIndex' => trim($row['POST_CODE'] ?? ''),
+            'kindVacation' => $this->extractKindVacation(trim($row['KIND_VACATION'] ?? '')),
             'status' => '',
         ]);
     }
