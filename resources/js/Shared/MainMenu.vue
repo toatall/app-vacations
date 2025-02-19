@@ -16,6 +16,7 @@ const urlHome = routes.home()
 const urlOrganizations = routes.organizations()
 const urlTable = routes.table()
 const urlFind = routes.find()
+const urlStructure = routes.structure()
 
 
 </script>
@@ -33,6 +34,12 @@ const urlFind = routes.find()
         <div>Табель</div>
       </Link>
     </div> 
+    <div class="mb-4">
+      <Link class="group flex items-center py-3" :href="urlStructure" :class="isUrl(urlStructure) ? 'text-white' : 'text-indigo-300 group-hover:text-white'">
+        <i class="pi pi-sitemap me-2"></i>
+        <div>Структура</div>
+      </Link>
+    </div>
     <div class="mb-4">
       <Link class="group flex items-center py-3" :href="urlFind" :class="isUrl(urlFind) ? 'text-white' : 'text-indigo-300 group-hover:text-white'">
         <i class="pi pi-search me-2"></i>

@@ -20,6 +20,9 @@ export default {
   // табель отпусков
   table: () => '/table',
 
+  // отпуска в виде структуры
+  structure: () => '/structure',
+
   // поиск
   find: () => '/find',
 
@@ -52,6 +55,11 @@ export default {
 
   vacationsFind: function (org_code, year) {
     return `/find-data/${org_code}/${year}`;
+  },
+
+  // данные по отпускам по структуре организации
+  structureData: function(org_code, year) {
+    return `${this.structure()}/data/${org_code}/${year}`;
   },
   
 

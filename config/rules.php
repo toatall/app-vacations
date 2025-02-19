@@ -61,5 +61,8 @@ return [
     'GET table/index' => 'table/index',
     'GET table/table-data/<code_org:\d+>/<year:\d{4}>' => 'table/table-data',
     
+    // Structure
+    'GET structure/index' => 'structure/index',
+    'GET structure/data/<code_org:\d+>/<year:\d{4}>' => 'structure/data',
 
 ];
