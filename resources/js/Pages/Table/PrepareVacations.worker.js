@@ -78,7 +78,7 @@ const transform = (data) => {
         id: item.id_employee,
         name: item.full_name,
         post: item.post,
-        sort: item.sort_index_employee,
+        sort: 0,//item.sort_index_employee,
         vacations: [],
         months: {},
       }
