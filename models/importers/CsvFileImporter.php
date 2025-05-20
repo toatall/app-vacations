@@ -16,7 +16,7 @@ class CsvFileImporter extends AbstractImporter
      * @var string
      */
     private $csvSeparator;
-    
+
     /**
      * @param string $filename имя csv-файла
      * @param \app\models\collections\AbstractVacationCollection $collection коллекция объектов подлежащих загрузке
@@ -25,11 +25,11 @@ class CsvFileImporter extends AbstractImporter
      * @param mixed $csvSeparator разделитель строк в csv-файле
      */
     public function __construct(string $filename, AbstractVacationCollection $collection, string $codeOrganization, string $year, $csvSeparator = ',')
-    {        
+    {
         parent::__construct($collection, $codeOrganization, $year);
         $this->filename = $filename;
         $this->csvSeparator = $csvSeparator;
-    }    
+    }
 
     /**
      * {@inheritDoc}
@@ -51,11 +51,11 @@ class CsvFileImporter extends AbstractImporter
      * {@inheritDoc}
      */
     protected function loadData(): AbstractVacationCollection
-    {        
+    {
         if (($handle = fopen($this->filename, "r")) !== FALSE) {
             while (($data = fgetcsv($handle, null, $this->csvSeparator)) !== FALSE) {
-                if (count($data) !== 6) {
-                    throw new \Exception('Количество полей должно быть равно 6');
+                if (count($data) !== 7) {
+                    throw new \Exception('Количество полей должно быть равно 7');
                 }
                 $this->collection->add($data);
             }

@@ -33,13 +33,14 @@ class FileVacationCollection extends AbstractVacationCollection
      * @return \app\models\VacationItem
      */
     protected function prepare($row): VacationItem
-    {        
+    {
         return new VacationItem([
             'dateStart' => $this->getDateStartFromArray($row),
             'dateEnd' => $this->getDateEndFromArray($row),
             'fullName' => $this->getFullNameFromArray($row),
             'organization' => $this->codeOrganization,
             'department' => $this->getDepartmentFromArray($row),
+            'post' => $this->getPostFromArray($row),
             'kindVacation' => $this->getKindVacationFromArray($row),
             'status' => $this->getStatusFromArray($row),
         ]);
@@ -96,13 +97,23 @@ class FileVacationCollection extends AbstractVacationCollection
     }
 
     /**
+     * Извлечение должности
+     * @param array $row
+     * @return string
+     */
+    private function getPostFromArray(array $row): string
+    {
+        return $row[4];
+    }
+
+    /**
      * Извлечение типа отпуска
      * @param array $row
      * @return string
      */
     protected function getKindVacationFromArray(array $row): string
     {
-        return $this->extractKindVacation($row[4]);
+        return $this->extractKindVacation($row[5]);
     }
 
     /**
@@ -134,7 +145,7 @@ class FileVacationCollection extends AbstractVacationCollection
      */
     protected function getStatusFromArray(array $row): string
     {
-        return $row[5];
+        return $row[6];
     }
 
 }
