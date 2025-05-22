@@ -2,111 +2,167 @@
 
 namespace app\commands;
 
+use app\models\Organization;
 use app\models\User;
 use Yii;
 use yii\console\Controller;
 use Faker\Factory;
 
+/**
+ * Загрузка начальных данных в БД
+ * - организации
+ * - пользователи
+ * Перед загрузкой выполняется предварительное удаление всех данных
+ */
 class DbController extends Controller
 {
 
+    /**
+     * @var \Faker\Generator;
+     */
+    private $faker;
+
+    /**
+     * {@inheritDoc}
+     */
+    public function init()
+    {
+        parent::init();
+        $this->faker = Factory::create('ru_RU');
+    }
+
+    /**
+     * @return Yii\db\Connection
+     */
     protected function getDb()
     {
         return Yii::$app->db;
     }
 
+    /**
+     * Загрузка данных
+     * @return void
+     */
     public function actionSeed()
     {
-        $db = $this->getDb();
-        $faker = Factory::create();
-        $usaStates = $this->usaStates();
-
-        $db->createCommand()
-            ->insert('accounts', [
-                'id' => 1,
-                'name' => 'Acme Corporation',
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-            ])->execute();
-        $idAccount = $db->getLastInsertID('accounts');
-
-        for($i=0; $i<100; $i++) {
-            $db->createCommand()
-                ->insert('organizations', [
-                    'id' => null, // automatic pk
-                    'account_id' => $idAccount,
-                    'name' => $faker->company,
-                    'email' => $faker->safeEmail,
-                    'phone' => $faker->phoneNumber,
-                    'address' => $faker->streetAddress,
-                    'city' => $faker->city,
-                    'region' => $faker->randomElement($usaStates),
-                    'country' => 'US',
-                    'postal_code' => $faker->postcode,
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s')
-                ])->execute();
-
-            $idOrganization = $db->getLastInsertID('organization');
-            
-            $db->createCommand()
-                ->insert('contacts', [
-                    'id' => null, // automatic pk
-                    'account_id' => $idAccount,
-                    'organization_id' => $idOrganization,
-                    'first_name' => $faker->firstName,
-                    'last_name' => $faker->lastName,
-                    'email' => $faker->unique()->safeEmail,
-                    'phone' => $faker->phoneNumber,
-                    'address' => $faker->streetAddress,
-                    'city' => $faker->city,
-                    'region' => $faker->randomElement($usaStates),
-                    'country' => 'US',
-                    'postal_code' => $faker->postcode,
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s')
-                ])->execute();
-        }
-        
-        for($i=0; $i<100; $i++) {
-            $db->createCommand()
-                ->insert('users', [
-                    'id' => null, // automatic pk
-                    'account_id' => $idAccount,
-                    'first_name' => $faker->firstName,
-                    'last_name' => $faker->lastName,
-                    'email' => $faker->unique()->safeEmail,
-                    'password' => 'secret',
-                    'owner' => '0',
-                    'remember_token' => $faker->regexify('[A-Za-z0-9]{10}'),
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s')
-                ])->execute();
-        }            
-
-        $user = new User();
-        $user->detachBehaviors();
-        $user->attributes = [
-            'account_id' => 1,
-            'first_name' => 'John',
-            'last_name' => 'Doe',
-            'email' => 'johndoe@example.com',
-            'password' => 'secret',
-            'owner' => 1
-        ];
-        $user->save(false);
+        $this->createOrganizations();
+        $this->createLogins();
     }
 
-    private function usaStates()
+    /**
+     * Очистка всех данных
+     * @return void
+     */
+    public function actionTruncate()
     {
-        return [
-            'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Canal Zone', 'Colorado', 'Connecticut', 'Delaware', 'District of Columbia', 
-            'Florida', 'Georgia', 'Guam', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 
-            'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 
-            'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Puerto Rico', 'Rhode Island', 
-            'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virgin Islands', 'Virginia', 'Washington', 'West Virginia', 
-            'Wisconsin', 'Wyoming',
-        ];
+        $this->truncateTables();
+    }
+
+    /**
+     * Создание фейковых организаций
+     * @return void
+     */
+    private function createOrganizations()
+    {
+        for ($i = 0; $i <= 3; $i++) {
+            $code = sprintf("%'04d", $i);
+            $nowDbDate = new \yii\db\Expression('NOW()');
+
+            $organization = new Organization([
+                'code' => $code,
+                'name' => "Organization {$code}",
+                'created_at' => $nowDbDate,
+                'updated_at' => $nowDbDate,
+            ]);
+            if ($organization->save()) {
+                $this->createUsers($code);
+            }
+        }
+    }
+
+    /**
+     * Создание фейковых пользователей
+     * @param string $orgCode
+     * @param int $count
+     * @return void
+     */
+    private function createUsers(string $orgCode, int $count = 5)
+    {
+        $nowDbDate = new \yii\db\Expression('NOW()');
+        $password = Yii::$app->security->generatePasswordHash('123456789');
+
+        for ($i = 0; $i < $count; $i++) {
+            $user = new User([
+                'username' => $this->faker->userName(),
+                'password' => $password,
+                'full_name' => $this->faker->name(),
+                'position' => $this->faker->randomElement(['Юрист', 'Бухгалтер', 'Администратор', 'Специалист', 'Программист']),
+                'email' => $this->faker->email(),
+                'org_code' => $orgCode,
+                'org_code_select' => $orgCode,
+                'created_at' => $nowDbDate,
+                'updated_at' => $nowDbDate,
+            ]);
+            if ($user->save()) {
+                // 
+            }
+        }
+    }
+
+    /**
+     * Полная очистка данных
+     * @return void
+     */
+    private function truncateTables()
+    {
+        $this->getDb()->createCommand('TRUNCATE TABLE "vacations_kind" CASCADE;')->execute();
+        $this->getDb()->createCommand('TRUNCATE TABLE "vacations_merged" CASCADE;')->execute();
+        $this->getDb()->createCommand('TRUNCATE TABLE "vacations"')->execute();
+        $this->getDb()->createCommand('TRUNCATE TABLE "employees" CASCADE;')->execute();
+        $this->getDb()->createCommand('TRUNCATE TABLE "departments" CASCADE;')->execute();
+        $this->getDb()->createCommand('TRUNCATE TABLE "users" CASCADE;')->execute();
+        $this->getDb()->createCommand('TRUNCATE TABLE "organizations" CASCADE;')->execute();
+
+        $this->getDb()->createCommand('TRUNCATE TABLE "auth_assignment" CASCADE;')->execute();
+        $this->getDb()->createCommand('TRUNCATE TABLE "auth_item_child" CASCADE;')->execute();
+        $this->getDb()->createCommand('TRUNCATE TABLE "auth_rule" CASCADE;')->execute();
+        $this->getDb()->createCommand('TRUNCATE TABLE "auth_item" CASCADE;')->execute();
+
+        $this->getDb()->createCommand('TRUNCATE TABLE "load_history" CASCADE;')->execute();
+    }
+
+    /**
+     * Создание УЗ администратора и пользователя
+     * @return void
+     */
+    private function createLogins()
+    {
+        $nowDbDate = new \yii\db\Expression('NOW()');
+        $orgCode = $this->getDb()->createCommand("SELECT [[code]] FROM {{%organizations}} ORDER BY RANDOM() LIMIT 1")->queryScalar();
+
+        (new User([
+            'username' => 'admin',
+            'password' => Yii::$app->security->generatePasswordHash('secret'),
+            'full_name' => 'Администратор',
+            'position' => 'Админ',
+            'email' => 'admin@example.com',
+            'org_code' => $orgCode,
+            'org_code_select' => $orgCode,
+            'created_at' => $nowDbDate,
+            'updated_at' => $nowDbDate,
+        ]))->save();
+
+        (new User([
+            'username' => 'user',
+            'password' => Yii::$app->security->generatePasswordHash('secret'),
+            'full_name' => 'Пользователь',
+            'position' => 'Пользователь',
+            'email' => 'user@example.com',
+            'org_code' => $orgCode,
+            'org_code_select' => $orgCode,
+            'created_at' => $nowDbDate,
+            'updated_at' => $nowDbDate,
+        ]))->save();
     }
 
 }
