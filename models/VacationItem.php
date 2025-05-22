@@ -68,7 +68,7 @@ class VacationItem extends BaseObject
      * Статус
      * @var string
      */
-    public $status;  
+    public $status;
 
     public function getDateStartUTC()
     {
@@ -87,7 +87,7 @@ class VacationItem extends BaseObject
 
     public function toArray()
     {
-        return [$this->dateStart, $this->dateEnd, $this->fullName, $this->department, $this->kindVacation, $this->status];
+        return [$this->dateStart, $this->dateEnd, $this->fullName, $this->department, $this->post, $this->kindVacation, $this->status];
     }
 
 }
