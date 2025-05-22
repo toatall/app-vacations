@@ -11,7 +11,8 @@
  * }
  * ```
  */
-class Yii {
+class Yii
+{
     /**
      * @var \yii\web\Application|\yii\console\Application|__Application
      */
@@ -22,13 +23,15 @@ class Yii {
  * @property yii\rbac\DbManager $authManager 
  * @property \yii\web\User|__WebUser|\app\models\User $user
  * @property \app\components\Roles $roles
- * @property \app\components\LdapAuthenticate $ldapAuthenticate
+ * @property \app\components\ldap\Ldap $ldap
  */
-class __Application {
+class __Application
+{
 }
 
 /**
  * @property app\models\User $identity
  */
-class __WebUser {
+class __WebUser
+{
 }

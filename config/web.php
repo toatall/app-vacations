@@ -10,8 +10,16 @@ $config = [
     'bootstrap' => ['log', 'inertia'],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
-        '@npm'   => '@vendor/npm-asset',
-    ],    
+        '@npm' => '@vendor/npm-asset',
+    ],
+    'container' => [
+        'definitions' => [
+            // Режим аутентификации:
+            // app\models\auth\LoginForm - с помощью формы ввода логина/пароля
+            // app\models\auth\LoginLdap - без формы ввода логина/пароля, через LDAP-сервер
+            'app\models\auth\LoginAbstract' => 'app\models\auth\LoginForm',
+        ],
+    ],
     'components' => [
         'request' => [
             'class' => 'tebe\inertia\web\Request',
@@ -62,9 +70,9 @@ $config = [
             'name' => '_Session',
             'savePath' => '@app/runtime/sessions'
         ],
-        
+
         'roles' => 'app\components\Roles',
-        
+
         'formatter' => [
             'class' => 'yii\i18n\Formatter',
             'locale' => 'ru-RU',
@@ -75,6 +83,17 @@ $config = [
             'timeFormat' => 'php:H:i:s',
             'thousandSeparator' => ' ',
         ],
+
+        // настройки подключения к ldap
+        // только при установленном 'app\models\authenticate\IAuthenticate' => 'app\models\authenticate\Ldap'
+        'ldap' =>
+            // 'class' => 'app\components\ldap\Ldap',
+            // 'connectionString' => 'ldap://n7701-dc10:389 ldap://n5001-dc07:389',
+            // 'baseDn' => 'DC=regions,DC=tax,DC=nalog,DC=ru',
+            array_merge(
+                ['class' => 'app\components\ldap\Ldap'],
+                require __DIR__ . '/ldap.php',
+            ),
     ],
     'params' => $params,
 ];

@@ -29,7 +29,7 @@ class User extends ActiveRecord implements IdentityInterface
 {
     use SoftDeleteTrait;
 
-    public $newPassword;    
+    public $newPassword;
 
     /**
      * {@inheritdoc}
@@ -44,16 +44,16 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function rules()
     {
-        return [            
-            [['username', 'email'], 'required'],          
+        return [
+            [['username', 'email'], 'required'],
             [['created_at', 'updated_at', 'deleted_at'], 'safe'],
             [['full_name'], 'string', 'max' => 250],
             [['email'], 'string', 'max' => 50],
             [['org_code', 'org_code_select'], 'string', 'max' => 5],
-            [['password'], 'string', 'max' => 255],            
+            [['password'], 'string', 'max' => 255],
             [['username', 'email'], 'unique'],
             [['newPassword'], 'string', 'max' => 255],
-            [['position'], 'string', 'max' => 250],         
+            [['position'], 'string', 'max' => 250],
         ];
     }
 
@@ -64,14 +64,14 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return static::attributeLabelsStatic();
     }
-    
+
     /**
      * @return string[]
      */
     public static function attributeLabelsStatic()
     {
         return [
-            'id' => 'ИД',            
+            'id' => 'ИД',
             'username' => 'Учетная запись',
             'org_code' => 'Организация',
             'org_code_select' => 'Код организации выбран',
@@ -91,25 +91,25 @@ class User extends ActiveRecord implements IdentityInterface
      * @return array
      */
     public function behaviors()
-    {                
+    {
         return [
             [
                 'class' => TimestampBehavior::class,
                 'value' => Yii::$app->formatter->asDatetime('Now', 'php:Y-m-d H:i:s'),
-            ],            
+            ],
         ];
-    }    
+    }
 
     /**
      * {@inheritDoc}
      */
-    public function beforeSave($insert) 
-    {        
+    public function beforeSave($insert)
+    {
         if (!empty($this->newPassword)) {
             $this->password = Yii::$app->security->generatePasswordHash($this->newPassword);
-        }                
+        }
         return parent::beforeSave($insert);
-    }    
+    }
 
     /**
      * Validates password
@@ -130,6 +130,13 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return static::findActual()
             ->andWhere(['email' => $email])
+            ->one();
+    }
+
+    public static function findByEmailOrName($name)
+    {
+        return static::findActual()
+            ->andWhere(['or', ['email' => $name], ['username' => $name]])
             ->one();
     }
 
@@ -192,7 +199,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function findById($id)
     {
-        return static::find()            
+        return static::find()
             ->where('id=:id', ['id' => $id])
             ->asArray()
             ->one();
@@ -200,13 +207,13 @@ class User extends ActiveRecord implements IdentityInterface
 
     public static function findByParams($search = null, $trashed = null)
     {
-        $query = (new Query())            
+        $query = (new Query())
             ->from('users');
 
         if (!empty($search)) {
             $query->andWhere(['like', 'username', $search]);
             $query->orWhere(['like', 'full_name', $search]);
-        }        
+        }
 
         if ($trashed === 'with') {
         } elseif ($trashed === 'only') {

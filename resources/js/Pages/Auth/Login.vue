@@ -5,8 +5,8 @@ import TextInput from "@/Shared/TextInput.vue";
 import LoadingButton from "@/Shared/LoadingButton.vue";
 
 const form = useForm({
-  email: null,
-  password: null,
+  email: 'admin@example.com',
+  password: 'secret',
   remember: false,
 })
 
@@ -25,10 +25,12 @@ const login = () => {
           <h1 class="text-center text-3xl font-bold">Добро пожаловать!</h1>
           <div class="w-full">
             <div class="w-full mt-4">
-              <text-input v-model="form.email" :error="form.errors.email" class="pb-8 pr-6 w-full lg:w-1/2" label="Email" type="email" autofocus autocapitalize="off" />
+              <text-input v-model="form.email" :error="form.errors.email" class="pb-8 pr-6 w-full lg:w-1/2"
+                label="Email or username" type="text" autofocus autocapitalize="off" />
             </div>
             <div class="w-full mt-4">
-              <text-input v-model="form.password" :error="form.errors.password" type="password" class="pb-8 pr-6 w-full lg:w-1/2" label="Password" />
+              <text-input v-model="form.password" :error="form.errors.password" type="password"
+                class="pb-8 pr-6 w-full lg:w-1/2" label="Password" />
             </div>
             <div class="w-full mt-4">
               <label class="flex items-center mt-6 select-none" for="remember">
@@ -36,7 +38,7 @@ const login = () => {
                 <span class="text-sm">Запомнить меня</span>
               </label>
             </div>
-          </div>          
+          </div>
         </div>
         <div class="flex px-10 py-4 bg-gray-100 border-t border-gray-100">
           <loading-button :loading="form.processing" class="btn-indigo ml-auto" type="submit">Login</loading-button>

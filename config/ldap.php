@@ -2,8 +2,8 @@
 
 // настройки для подключения к Ldap
 return [
-    'connectionString' => 'ldap://example.ru:389',
-    'user' => 'admin',
-    'password' => 'P@ssword',
-    'baseDn' => 'OU=dep,DC=server,DC=example,DC=ru',   
+    'connectionString' => 'dc.example.com',
+    'bindUser' => 'EXAMPLE\Admin',
+    'bindPassword' => 'Secret',
+    'baseDn' => 'DC=example,DC=com',
 ];

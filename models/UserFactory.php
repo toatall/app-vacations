@@ -37,10 +37,7 @@ class UserFactory
         $model = $userModel->find()->where(['username' => $username])->one();
         if ($model === null) {
             Yii::info("Пользователь $username отсутствует в БД. Создание новой записи!");
-            if (($model = $this->createUser($username, $attributes)) === null) {
-                Yii::warning("Пользователь $username не создан в БД!");
-                return null;
-            }
+            $model = $this->createUser($username, $attributes);
         }
         return $model;
     }
@@ -49,10 +46,10 @@ class UserFactory
      * Создание пользователя в БД
      * @param mixed $username
      * @param mixed $attributes 
-     * @return User|null
+     * @return User
      */
     private function createUser(string $username, array $attributes)
-    {        
+    {
         $userModel = $this->getUserModel();
         $userModel->username = $username;
         $userModel->org_code = $this->getOrgCodeFromUsername($username);
@@ -62,13 +59,11 @@ class UserFactory
         $userModel->position = $attributes['title'][0] ?? null;
         $userModel->newPassword = md5(time());
 
-        if ($userModel->save()) {
-            return $userModel;
+        if (!$userModel->save()) {
+            Yii::warning("Пользователь $username не сохранен в БД! Ошибки: " . print_r($userModel->getErrors(), true));
         }
 
-        Yii::warning("Пользователь $username не сохранен в БД! Ошибки: " . print_r($userModel->getErrors(), true));
-        
-        return null;
+        return $userModel;
     }
 
     /**
@@ -80,7 +75,7 @@ class UserFactory
     {
         $result = null;
         if (preg_match('/^\d{4}|^n\d{4}/', $username, $result)) {
-            if (is_array($result) && count($result)>0) {
+            if (is_array($result) && count($result) > 0) {
                 return $result[0];
             }
         }

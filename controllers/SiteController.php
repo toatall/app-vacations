@@ -2,11 +2,7 @@
 
 namespace app\controllers;
 
-use app\components\LdapAuthenticate;
-use app\components\LdapFinder;
 use app\components\SharedDataFilter;
-use app\models\LoginForm;
-use app\models\UserFactory;
 use tebe\inertia\web\Controller;
 use Yii;
 use yii\filters\AccessControl;
@@ -63,21 +59,21 @@ class SiteController extends Controller
     public function actionIndex()
     {
         return $this->inertia('Dashboard/Index');
-    }    
+    }
 
     /**
      * Смена организации
      * @return void|boolean
      */
     public function actionChangeOrganization()
-    {        
+    {
         $code = Yii::$app->request->post('code');
         if (Yii::$app->user->isGuest) {
             return false;
         }
         /** @var \app\models\User $user */
-        $user = Yii::$app->user->identity;       
-        $user->org_code_select = $code;        
+        $user = Yii::$app->user->identity;
+        $user->org_code_select = $code;
         $user->save(false, ['org_code_select']);
         Yii::$app->session->remove('user');
         Yii::$app->session->setFlash('success', 'Организация изменена');
@@ -87,38 +83,24 @@ class SiteController extends Controller
      * Вход
      * @return Response|string
      */
-    public function actionLogin()
+    public function actionLogin(\app\models\auth\LoginAbstract $model)
     {
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
         }
 
-        // Аутентификация без ввода логина и пароля (на сервере должна быть включена windows-аутентификация)
-        if (Yii::$app->params['useWindowsAuthenticate'] && isset($_SERVER['AUTH_USER'])) {
-            $username = $this->removeDomainInUsername($_SERVER['AUTH_USER']);
-            $ldapAuthenticate = new LdapAuthenticate(new LdapFinder(Yii::$app->params['ldapConfig']), new UserFactory());
-            if ($ldapAuthenticate->login($username)) {
-                return $this->goBack();
-            }
-            else {
-                // return not found page
-                return $this->inertia('Auth/NotFound', [
-                    'username' => $username,
-                ]);
-            }
-        }
-
         $postData = Yii::$app->request->post();
-        $model = new LoginForm();
         if ($model->load($postData, '')) {
+
             if ($model->login()) {
                 return $this->goBack();
             }
+
             Yii::$app->session->setFlash('errors', $model->getErrors());
             return $this->redirect(['login']);
         }
 
-        return $this->inertia('Auth/Login');        
+        return $this->inertia('Auth/Login');
     }
 
     /**
@@ -127,7 +109,7 @@ class SiteController extends Controller
      * @return string
      */
     protected function removeDomainInUsername($fullName)
-    {        
+    {
         $parts = preg_split("/\\\/", $fullName);
         return $parts[1] ?? $parts[0];
     }
