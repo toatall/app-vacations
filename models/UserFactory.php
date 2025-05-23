@@ -8,20 +8,6 @@ use Yii;
  */
 class UserFactory
 {
-    /**
-     * Имя класса работы с пользователями
-     * @var string
-     */
-    public $userClass = 'app\models\User';
-
-    /**
-     * Создание объекта работы с пользователями
-     * @return User
-     */
-    private function getUserModel($params = [])
-    {
-        return Yii::createObject($this->userClass, $params);
-    }
 
     /**
      * Поиск пользователя в БД
@@ -32,9 +18,7 @@ class UserFactory
      */
     public function findOrCreate(string $username, array $attributes)
     {
-        $userModel = $this->getUserModel();
-
-        $model = $userModel->find()->where(['username' => $username])->one();
+        $model = User::find()->where(['username' => $username])->one();
         if ($model === null) {
             Yii::info("Пользователь $username отсутствует в БД. Создание новой записи!");
             $model = $this->createUser($username, $attributes);
@@ -50,14 +34,16 @@ class UserFactory
      */
     private function createUser(string $username, array $attributes)
     {
-        $userModel = $this->getUserModel();
-        $userModel->username = $username;
-        $userModel->org_code = $this->getOrgCodeFromUsername($username);
-        $userModel->org_code_select = $userModel->org_code;
-        $userModel->full_name = $attributes['displayName'][0] ?? null;
-        $userModel->email = $attributes['mail'][0] ?? null;
-        $userModel->position = $attributes['title'][0] ?? null;
-        $userModel->newPassword = md5(time());
+        $orgCode = $this->getOrgCodeFromUsername($username);
+        $userModel = new User([
+            'username' => $username,
+            'org_code' => $orgCode,
+            'org_code_select' => $orgCode,
+            'full_name' => $attributes['cn'],
+            'email' => $attributes['mail'],
+            'position' => $attributes['title'],
+            'newPassword' => Yii::$app->security->generateRandomString(),
+        ]);
 
         if (!$userModel->save()) {
             Yii::warning("Пользователь $username не сохранен в БД! Ошибки: " . print_r($userModel->getErrors(), true));
