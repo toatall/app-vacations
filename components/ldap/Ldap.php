@@ -54,7 +54,7 @@ class Ldap extends Component
      * Извлекаемые атрибуты
      * @var array
      */
-    public array $searchAttributes = ['sAMAccountName', 'displayName', 'mail', 'title'];
+    public array $searchAttributes = ['sAMAccountName', 'cn', 'mail', 'title'];
 
     /**
      * Количество выбранных записей
@@ -76,8 +76,11 @@ class Ldap extends Component
     private function connect(string $connectionString): \LDAP\Connection
     {
         $connection = ldap_connect($connectionString);
-        ldap_set_option($connection, LDAP_OPT_PROTOCOL_VERSION, 3);
-        ldap_set_option($connection, LDAP_OPT_REFERRALS, false);
+
+        $this->options = [
+            LDAP_OPT_PROTOCOL_VERSION => 3,
+            LDAP_OPT_REFERRALS => false,
+        ] + $this->options;
 
         foreach ($this->options as $option => $value) {
             ldap_set_option($this->connection, $option, $value);
@@ -126,21 +129,21 @@ class Ldap extends Component
     public function authenticate(string $user)
     {
         if (!($connection = $this->connect($this->connectionString))) {
-            throw new LdapExtension('Unable connect ldap server!');
+            throw new LdapException('Unable connect ldap server!');
         }
 
         if (!$this->bind($connection, $this->bindUser, $this->bindPassword)) {
-            throw new LdapExtension('Unable bind ldap server!');
+            throw new LdapException('Unable bind ldap server!');
         }
 
         $username = $this->getUsernameFromPrincipalName($user);
+
 
         if (!($entry = $this->search($connection, $username))) {
             return null;
         }
 
         return array_merge($this->getAttributeValues($entry), ['username' => $username]);
-
     }
 
     /**
