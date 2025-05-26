@@ -1,22 +1,27 @@
-version: '3.9'
 services:
+
   webserver:
-    container_name: PHP-webServer
-    build:    
-      context: .
-      dockerfile: Dockerfile
+    image: yiisoftware/yii2-php:8.3-apache
     volumes:
-      - ./app:/var/www/html
+      - ~/.composer-docker/cache:/root/.composer/cache:delegated
+      - ./:/app:delegated
     ports:
       - '8000:80'
     depends_on:
       - postgres
-
+    command: >
+      bash -c "
+      composer install
+      apt-get update && apt-get install -y netcat &&
+      while ! nc -z postgres 5432; do sleep 1; done;
+      refresh.sh
+      apache2-foreground
+      "
   postgres:
     image: postgres:16.0
     environment:
-      POSTGRES_DB: test_database
-      POSTGRES_USER: db_user
-      POSTGRES_PASSWORD: db_password
+      POSTGRES_DB: "app-vacations"
+      POSTGRES_USER: "vacation"
+      POSTGRES_PASSWORD: "secret"
     ports:
-      - "5432:5432"
+      - '5432:5432'
