@@ -1,3 +1,3 @@
 <template>
-  <img src="/img/icon-vacation.png" style="max-width: 28px; max-height: 28px;" />
+  <img src="/img/icon-vacation.png" style="width: 28px; height: 28px;" />
 </template>
