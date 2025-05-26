@@ -4,6 +4,7 @@ namespace app\commands;
 use DateInterval;
 use Faker\Factory;
 use yii\console\Controller;
+use yii\helpers\Console;
 
 /**
  * Загрузка в БД данных об отпусках, сотрудниках, отделах
@@ -36,6 +37,7 @@ class VacationsController extends Controller
      */
     public function actionGenerate(int $countUsers = 50, int $maxPeriodsByUser = 8, ?string $csvFile = null)
     {
+        $this->stdout("Генерация отпусков: количество пользователей - {$countUsers}, максимальное количество периодов - {$maxPeriodsByUser}, файл - {$csvFile}..." . PHP_EOL);
         $vacations = [];
         for ($iUser = 0; $iUser < $countUsers; $iUser++) {
             $employeeName = $this->generateFullName();
@@ -59,6 +61,7 @@ class VacationsController extends Controller
             $csvFile = \Yii::getAlias('@runtime') . '/vacations.csv';
         }
         file_put_contents(filename: $csvFile, data: implode("\n", $vacations));
+        $this->stdout("Генерация завершена" . PHP_EOL, Console::FG_GREEN);
     }
 
     /**

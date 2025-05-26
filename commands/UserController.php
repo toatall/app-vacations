@@ -60,10 +60,10 @@ class UserController extends Controller
             'email' => $email,
         ]);
         if ($model->save()) {
-            $this->stdout("User $username created successfully!", Console::FG_GREEN);
+            $this->stdout("User $username created successfully!". PHP_EOL, Console::FG_GREEN);
         }
         else {
-            $this->stdout("Failed to create user $username!", Console::FG_RED);
+            $this->stdout("Failed to create user $username!". PHP_EOL, Console::FG_RED);
         }
     }
 
