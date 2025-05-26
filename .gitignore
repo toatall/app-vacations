@@ -40,3 +40,5 @@ web/*.woff2
 web/*.ttf
 web/*.eot
 .phpunit.result.cache
+
+.vscode
