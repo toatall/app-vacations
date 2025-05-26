@@ -14,6 +14,7 @@ const isUrl = (url) => {
 
 const urlHome = routes.home()
 const urlOrganizations = routes.organizations()
+const urlLoadHistory = routes.loadHistory()
 const urlTable = routes.table()
 const urlFind = routes.find()
 const urlStructure = routes.structure()
@@ -53,6 +54,13 @@ const urlStructure = routes.structure()
         <div>Организации</div>
       </Link>
     </div>
+    <div v-if="isAdmin" class="mb-4">
+      <Link class="group flex items-center py-3" :href="urlLoadHistory" :class="isUrl(urlLoadHistory) ? 'text-white' : 'text-indigo-300 group-hover:text-white'">
+        <i class="pi pi-history me-2"></i>
+        <div>Журнал импорта отпусков</div>
+      </Link>
+    </div>
+
   </div>
 </template>
 

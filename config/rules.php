@@ -2,16 +2,7 @@
 return [
     // Auth
     'login' => 'site/login',
-    'DELETE logout' => 'site/logout',
-
-    // Contacts
-    'GET contacts' => 'contact/index',
-    'POST contacts' => 'contact/insert',
-    'GET contacts/create' => 'contact/create',
-    'GET contacts/<id:\d+>/edit' => 'contact/edit',
-    'PUT contacts/<id:\d+>' => 'contact/update',
-    'DELETE contacts/<id:\d+>' => 'contact/delete',
-    'PUT contacts/<id:\d+>/restore' => 'contact/restore',
+    'DELETE logout' => 'site/logout',    
 
     // Organizations
     'GET organizations' => 'organization/index',
@@ -58,11 +49,14 @@ return [
     'GET find-data/<code_org:\d+>/<year:\d{4}>' => 'vacations/find-data',
 
     // Table
-    'GET table/index' => 'table/index',
+    'GET table' => 'table/index',
     'GET table/table-data/<code_org:\d+>/<year:\d{4}>' => 'table/table-data',
     
     // Structure
-    'GET structure/index' => 'structure/index',
-    'GET structure/data/<code_org:\d+>/<year:\d{4}>' => 'structure/data',
+    'GET structure' => 'structure/index',
+    'GET structure/data/<code_org:\d+>/<year:\d{4}>' => 'structure/data',    
 
+    // Load history
+    'GET load-history' => 'load-history',
+    
 ];

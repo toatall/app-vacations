@@ -61,6 +61,9 @@ export default {
   structureData: function(org_code, year) {
     return `${this.structure()}/data/${org_code}/${year}`;
   },
+
+  // журнал импорта
+  loadHistory: () => '/load-history',
   
 
 }
