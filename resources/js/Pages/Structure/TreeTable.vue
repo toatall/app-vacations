@@ -25,8 +25,7 @@ watch(
 
     axios.get(routes.structureData(props.orgCode, props.year))
       .then(({ data }) => {
-        treeData.value = toArrayAndSort(data);
-        console.log(treeData.value);        
+        treeData.value = toArrayAndSort(data);        
         loading.value = false;
       })
   }

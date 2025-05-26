@@ -53,7 +53,7 @@ watch(
           calendar.value = data.calendar;
           departments.value = data.items;
           totalEmployees.value = data.totalEmployees;
-          console.log(departments.value)
+          
           worker.terminate();
           loading.value = false;
 
