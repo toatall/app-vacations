@@ -11,7 +11,10 @@ services:
       - postgres
     # закомментировать command, если не требуется обновление БД при каждом запуске
     command: >
-      bash -c "refresh.sh"
+      bash -c "refresh.sh"      
+    environment:
+      PHP_ENABLE_XDEBUG: 1
+      XDEBUG_MODE: "coverage"
   postgres:
     image: postgres:17.0
     environment:
@@ -20,3 +23,13 @@ services:
       POSTGRES_PASSWORD: "secret"
     ports:
       - '5432:5432'
+
+  # Раскомментировать для запуска тестов
+  # postgres-test:
+  #   image: postgres:17.0
+  #   environment:
+  #     POSTGRES_DB: "app-vacations-test"
+  #     POSTGRES_USER: "vacation"
+  #     POSTGRES_PASSWORD: "secret"
+  #   ports:
+  #     - '5433:5432'
