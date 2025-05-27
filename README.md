@@ -16,15 +16,14 @@
 
 Страница "Журнал импорта отпусков" показывает историю результатов импорта данных об отпусках (доступна только администраторам).
 
-![](screen_01.png)
-![](screen_02.png)
-![](screen_03.png)
+![Главная](/screen_01.png)
+![Табель](/screen_02.png)
+![Поиск](/screen_03.png)
 
 **Видео демонстрация**
-<iframe src="https://vkvideo.ru/video_ext.php?oid=-166203809&id=456239017&hd=3&autoplay=1" width="1280" height="720" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" frameborder="0" allowfullscreen></iframe>
 
-<br />
-<br />
+<a href="https://vkvideo.ru/video_ext.php?oid=-166203809&id=456239017&hd=3&autoplay=1" target="_blank">Ссылка на VK Видео</a>
+
 
 В качестве базового приложения использован https://github.com/tbreuss/pingcrm-yii2
 
@@ -166,7 +165,7 @@ vendor/bin/codecept run unit
 
 ## Требования
 
-- `PHP >=7.4.0` <img src="https://upload.wikimedia.org/wikipedia/commons/2/27/PHP-logo.svg" style="height:1.2rem;" /> <img src="https://www.yiiframework.com/image/design/logo/yii3_full_for_light.svg" style="height:1.2rem;" />
-- `Node.js & NPM` <img src="https://upload.wikimedia.org/wikipedia/commons/d/d9/Node.js_logo.svg" style="height:1.2rem;" /> <img src="https://upload.wikimedia.org/wikipedia/commons/d/db/Npm-logo.svg" style="height:1.2rem;" />
-- `Postgres` <img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Postgresql_elephant.svg" style="height:1.2rem;" />
+- `PHP >=7.4.0` <img src="https://upload.wikimedia.org/wikipedia/commons/2/27/PHP-logo.svg" height="20" /> <img src="https://www.yiiframework.com/image/design/logo/yii3_full_for_light.svg" height="20" />
+- `Node.js & NPM` <img src="https://upload.wikimedia.org/wikipedia/commons/d/d9/Node.js_logo.svg" height="20" /> <img src="https://upload.wikimedia.org/wikipedia/commons/d/db/Npm-logo.svg" height="20" />
+- `Postgres` <img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Postgresql_elephant.svg" height="20" />
 
