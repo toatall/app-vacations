@@ -2,131 +2,171 @@
 
 [![Build & Deploy](https://github.com/toatall/app-vacations/actions/workflows/deploy.yml/badge.svg?event=push)](https://github.com/toatall/app-vacations/actions/workflows/deploy.yml)
 
-
 Приложение для демонстрации информации об отпусках.
 
-Возможно переключение организации в правом верхнем меню.
+Возможно переключение организации (в правом верхнем меню).
 
-Главная страница представляет статистические данные об отпусках сотрудников. 
+Главная страница представляет статистические данные об отпусках сотрудников.
 
 Страница "Табель" показывает отпуска сгруппированные по отделам и месяцам. Каждую группу возможно развернуть для просмотра более детальной информации.
 
 Страница "Поиск" помогает найти информацию по отпускам по сотруднику или по дате отпуска.
 
+Страница "Организации" и позволяет управлять списком организаций (доступна только администраторам).
+
+Страница "Журнал импорта отпусков" показывает историю результатов импорта данных об отпусках (доступна только администраторам).
+
 ![](screen_01.png)
 ![](screen_02.png)
 ![](screen_03.png)
 
-**В качестве базового приложения использован https://github.com/tbreuss/pingcrm-yii2**
+**Видео демонстрация**
+<iframe src="https://vkvideo.ru/video_ext.php?oid=-166203809&id=456239017&hd=3&autoplay=1" width="1280" height="720" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" frameborder="0" allowfullscreen></iframe>
 
-## Установка
+<br />
+<br />
 
-Clone the repo locally:
+В качестве базового приложения использован https://github.com/tbreuss/pingcrm-yii2
+
+## Установка через Docker (быстрая)
+
+Скопировать репозиторий локально:
 
 ```sh
 git clone https://github.com/toatall/app-vacations app-vacations
 cd app-vacations
 ```
 
-Install PHP dependencies:
+Установить composer, npm зависимости, скомпилировать assets:
+
+```sh
+composer install && npm ci && npm run css-dev && npm run dev
+```
+
+Запустить docker
+```sh
+docker-compose up
+```
+
+## Установка вручную
+
+Скопировать репозиторий локально:
+
+```sh
+git clone https://github.com/toatall/app-vacations app-vacations
+cd app-vacations
+```
+
+Установить composer зависимости:
 
 ```sh
 composer install
 ```
 
-Install NPM dependencies:
+Установить NPM зависимости:
 
 ```sh
 npm ci
 ```
 
-Build assets:
+Создать базу данных, выполнить настройку подключения в файле `config/db.php`.
+
+Запустить миграции:
+
+```sh
+php yii migrate
+php yii migrate --migrationPath=@yii/rbac/migrations
+```
+
+Выполнить команды для наполнения БД (организации, пользователи, роли):
+
+```sh
+php yii db/seed
+php yii roles/init
+php yii roles/assign "admin" "admin"
+```
+
+Генерация случайных данных:
+
+
+```sh
+# Для windows:
+php yii vacations/generate 100 8 runtime/vacations_0000.csv
+php yii csv-loader runtime/vacations_0000.csv 0000 %date:~6,4% ";"
+php yii vacations/generate 80 8 runtime/vacations_0001.csv
+php yii csv-loader runtime/vacations_0001.csv 0001 %date:~6,4% ";"
+php yii vacations/generate 70 8 runtime/vacations_0002.csv
+php yii csv-loader runtime/vacations_0002.csv 0002 %date:~6,4% ";"
+php yii vacations/generate 90 10 runtime/vacations_0003.csv
+php yii csv-loader runtime/vacations_0003.csv 0003 %date:~6,4% ";"
+del /q runtime/vacations.csv
+
+# Для Linux:
+php yii vacations/generate 100 8 runtime/vacations.csv;
+php yii csv-loader runtime/vacations.csv 0000 $(date +%Y) ";";
+php yii vacations/generate 80 8 runtime/vacations.csv;
+php yii csv-loader runtime/vacations.csv 0001 $(date +%Y) ";";
+php yii vacations/generate 70 8 runtime/vacations.csv;
+php yii csv-loader runtime/vacations.csv 0002 $(date +%Y) ";";
+php yii vacations/generate 90 10 runtime/vacations.csv;
+php yii csv-loader runtime/vacations.csv 0003 $(date +%Y) ";";
+rm runtime/vacations.csv;
+```
+
+Запустить npm:
 
 ```sh
 npm run css-dev
 npm run dev
 ```
 
-Create Postgres database. 
-
-Run database migrations:
-
+Для разработки:
 ```sh
-php yii migrate
+npm run watch
 ```
 
-Run database seeder:
-
-```sh
-php yii db/seed
-```
-
-Run the dev server (the output will give the address):
+Запустить веб-сервер:
 
 ```sh
 php yii serve
 ```
 
-You're ready to go! Visit Ping CRM in your browser, and login with:
+Все готово, перейти на страницу входа и ввести учетные данные:
 
-- **Username:** johndoe@example.com
+- **Username:** admin@example.com
 - **Password:** secret
 
-## Running tests
+## Запуск тестов
 
-To run the Ping CRM tests, run:
+В файле `docker.yml` раскомментировать сервис `postgres-test`.
 
+В файле `config/test_db.php` настроить подключение к БД.
+```sh
+...
+$db['dsn'] = 'pgsql:host=postgres-test;port=5432;dbname=app-vacations-test';
+...
 ```
-(to be done)
+
+Выполнить миграции:
+```sh
+php tests/bin/yii migrate --migrationPath=@yii/rbac/migrations --interactive=0;
+php tests/bin/yii migrate --interactive=0;
+```
+или
+```sh
+cd tests
+./migrates.sh
 ```
 
-## Requirements
+Для запуска тестирования выполнить команду:
 
-- PHP >=7.4.0
-- Node.js & NPM
-- Postgres
+```sh
+vendor/bin/codecept run unit
+```
 
-## Extending this project
+## Требования
 
-The following steps are required when extending this project with new features.
+- `PHP >=7.4.0` <img src="https://upload.wikimedia.org/wikipedia/commons/2/27/PHP-logo.svg" style="height:1.2rem;" /> <img src="https://www.yiiframework.com/image/design/logo/yii3_full_for_light.svg" style="height:1.2rem;" />
+- `Node.js & NPM` <img src="https://upload.wikimedia.org/wikipedia/commons/d/d9/Node.js_logo.svg" style="height:1.2rem;" /> <img src="https://upload.wikimedia.org/wikipedia/commons/d/db/Npm-logo.svg" style="height:1.2rem;" />
+- `Postgres` <img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Postgresql_elephant.svg" style="height:1.2rem;" />
 
-### In the backend
-
-- add new controller, that extends from inertia controller
-- add one ore more actions
-- return from the actions with a call to the inertia render method   
-
-~~~php
-<?php
-
-namespace app\controllers;
-
-use tebe\inertia\web\Controller;
-
-class CustomController extends Controller
-{
-    public function actionIndex()
-    {
-        $params = [
-            'data' => [],
-        ];
-        return $this->inertia('demo/index', $params);
-    }
-}
-~~~
-
-You can find more information at <https://github.com/tbreuss/yii2-inertia>.
-
-### In the frontend
-
-- add a new page under `resources/js/Pages` for each controller action you added in the backend 
-- copy&paste one of the existing page examples
-- implement and/or extend Vue.js stuff as needed
-- use frontend tooling as described here and in package.json
-
-You can find more information at <https://inertiajs.com>.
-
-## Credits
-- Original work by Jonathan Reinink (@reinink) and contributors
-- Port to Yii 2 by Thomas Breuss (@tbreuss)
-- Modified by @toatall (https://github.com/toatall)
