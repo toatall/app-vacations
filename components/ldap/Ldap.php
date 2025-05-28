@@ -64,12 +64,6 @@ class Ldap extends Component
 
 
     /**
-     * @var \LDAP\Connection
-     */
-    private $connection;
-
-
-    /**
      * Подключение к серверу     
      * @return \LDAP\Connection
      */
@@ -83,7 +77,7 @@ class Ldap extends Component
         ] + $this->options;
 
         foreach ($this->options as $option => $value) {
-            ldap_set_option($this->connection, $option, $value);
+            ldap_set_option($connection, $option, $value);
         }
 
         return $connection;
